@@ -29,18 +29,9 @@ coffee_machine = CoffeeMachine(config)
 @app.route('/')
 async def index(request):
     chart_data = coffee_machine.get_chart_json()
-    preinfusion = str(config.get('preinfusion'))
     extraction = str(config.get('extraction'))
-    servo_angle = str(config.get('servo_angle'))
-    print(f"Chart data: {chart_data}")  # Debug print
-    print(f"Preinfusion: {preinfusion}")  # Debug print
-    print(f"Extraction: {extraction}")  # Debug print
-    print(f"Servo angle: {servo_angle}")  # Debug print
     html = HTML.replace('{{chart_data}}', str(chart_data))  # Ensure string for replacement
-    html = html.replace('{{preinfusion}}', preinfusion)
-    html = html.replace('{{extraction}}', extraction)
-    html = html.replace('{{servo_angle}}', servo_angle)
-    print(f"Generated HTML length: {len(html)}")  # Debug print for HTML length
+    html = html.replace('{{extraction}}', str(int(extraction)))
     return Response(html, headers={'Content-Type': 'text/html'})
 
 @app.route('/get_chart_data')
@@ -72,7 +63,7 @@ async def main():
     try:
         connect_wifi()
         print('here')
-        await app.start_server(HOST, port=PORT, debug=True)
+        await app.start_server(HOST, port=PORT)
         print('andhere')
     except Exception as e:
         print(f"Error starting server: {e}")
