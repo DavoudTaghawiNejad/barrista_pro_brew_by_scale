@@ -22,6 +22,17 @@
         -moz-appearance: textfield;
         }
     </style>
+    <style>
+        .mdc-floating-label {
+            text-align: left;  /* Align label to the left */
+            position: absolute;  /* Ensure it's positioned absolutely if needed */
+            left: 0;  /* Align to the left edge */
+        }
+        .mdc-notched-outline {
+            display: flex;  /* Use flex to align contents */
+            align-items: center;  /* Center vertically if needed */
+        }
+    </style>
 </head>
 <body>
     <div class="mdc-snackbar">
@@ -51,10 +62,32 @@
     <br><br>
     <h3>Adjust Values</h3>
     <label>Dose (grams):</label>
-    <input type="number" id="dose" step="0.1" min="0" style="width: 100px;">
+    <button class="mdc-button mdc-button--raised" id="decreaseDose">-</button>
+    <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
+        <input type="number" id="dose" class="mdc-text-field__input" step="0.1" min="0" style="width: 100px;">
+        <span class="mdc-notched-outline">
+          <span class="mdc-notched-outline__leading"></span>
+          <span class="mdc-notched-outline__notch">
+            <span class="mdc-floating-label"></span>
+          </span>
+          <span class="mdc-notched-outline__trailing"></span>
+        </span>
+      </label>
+    <button class="mdc-button mdc-button--raised" id="increaseDose">+</button>
     <br><br>
     <label>Grind Size:</label>
-    <input type="number" id="grind_size" step="1" min="0" style="width: 100px;">
+    <button class="mdc-button mdc-button--raised" id="decreaseGrind">-</button>
+    <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
+        <input type="number" id="grind_size" class="mdc-text-field__input" step="1" min="0" style="width: 100px;">
+        <span class="mdc-notched-outline">
+          <span class="mdc-notched-outline__leading"></span>
+          <span class="mdc-notched-outline__notch">
+            <span class="mdc-floating-label"></span>
+          </span>
+          <span class="mdc-notched-outline__trailing"></span>
+        </span>
+      </label>
+    <button class="mdc-button mdc-button--raised" id="increaseGrind">+</button>
     <br><br>
     <label>Extraction (grams):</label>
     <button class="mdc-button mdc-button--raised" id="decrease">-</button>
@@ -63,7 +96,7 @@
         <span class="mdc-notched-outline">
           <span class="mdc-notched-outline__leading"></span>
           <span class="mdc-notched-outline__notch">
-            <span class="mdc-floating-label">Grams</span>
+            <span class="mdc-floating-label"></span>
           </span>
           <span class="mdc-notched-outline__trailing"></span>
         </span>
@@ -211,6 +244,12 @@ window.onload = function () {
             document.getElementById('extraction').value = '';
         }
     });
+    loadCoffees().then(() => {
+        if (document.getElementById('coffeeSelect').options.length > 1) {
+            document.getElementById('coffeeSelect').value = document.getElementById('coffeeSelect').options[document.getElementById('coffeeSelect').options.length - 1].value;
+            document.getElementById('coffeeSelect').dispatchEvent(new Event('change'));
+        }
+    });
     // Initialize MDC buttons
     const buttons = document.querySelectorAll('.mdc-button');
     buttons.forEach(button => mdc.ripple.MDCRipple.attachTo(button));
@@ -272,6 +311,30 @@ window.onload = function () {
             const input = document.getElementById('extraction');
             let value = parseInt(input.value) || 0;
             if (value < 100) input.value = value + 1;
+        });
+
+        document.getElementById('decreaseDose').addEventListener('click', function () {
+            const input = document.getElementById('dose');
+            let value = parseFloat(input.value) || 0.0;
+            if (value > 0) input.value = (value - 0.1).toFixed(1);
+        });
+
+        document.getElementById('increaseDose').addEventListener('click', function () {
+            const input = document.getElementById('dose');
+            let value = parseFloat(input.value) || 0.0;
+            input.value = (value + 0.1).toFixed(1);
+        });
+
+        document.getElementById('decreaseGrind').addEventListener('click', function () {
+            const input = document.getElementById('grind_size');
+            let value = parseInt(input.value) || 0;
+            if (value > 0) input.value = value - 1;
+        });
+
+        document.getElementById('increaseGrind').addEventListener('click', function () {
+            const input = document.getElementById('grind_size');
+            let value = parseInt(input.value) || 0;
+            input.value = value + 1;
         });
     </script>
 </body>
