@@ -61,9 +61,10 @@
     </div>
 
     <script>
-        let lineChart;
-        let pollInterval;
-        let snackbar;
+let isMakingCoffee = false;
+let lineChart;
+let pollInterval;
+let snackbar;
 
         async function loadData() {
             try {
@@ -96,78 +97,83 @@
             }
         }
 
-        async function makeCoffee() {
-            const extraction = document.getElementById('extraction').value;
-            const response = await fetch('/make_coffee', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ extraction })
-            });
-            if (response.ok) {
-                snackbar.labelText = 'Coffee making started!';
-                snackbar.open();
-            } else {
-                snackbar.labelText = 'Coffee making failed. Please try again.';
-                snackbar.open();
-            }
-        }
+async function makeCoffee() {
+    const extraction = document.getElementById('extraction').value;
+    isMakingCoffee = true;  // Start making coffee
+    startPolling();  // Only if not already polling
+    const response = await fetch('/make_coffee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ extraction })
+    });
+    if (response.ok) {
+        isMakingCoffee = false;  // Coffee making finished
+        if (pollInterval) clearInterval(pollInterval);  // Stop polling
+        snackbar.labelText = 'Coffee making started!';
+        snackbar.open();
+    } else {
+        isMakingCoffee = false;  // Reset on failure
+        snackbar.labelText = 'Coffee making failed. Please try again.';
+        snackbar.open();
+    }
+}
 
-        function startPolling() {
-            if (pollInterval) clearInterval(pollInterval);
-            pollInterval = setInterval(loadData, 10);
-        }
+function startPolling() {
+    if (!pollInterval && isMakingCoffee) {
+        pollInterval = setInterval(loadData, 10);
+    }
+}
 
-        window.onload = function () {
-            // Initialize MDC buttons
-            const buttons = document.querySelectorAll('.mdc-button');
-            buttons.forEach(button => mdc.ripple.MDCRipple.attachTo(button));
-            mdc.textField.MDCTextField.attachTo(document.querySelector('.mdc-text-field'));
+window.onload = function () {
+    // Initialize MDC buttons
+    const buttons = document.querySelectorAll('.mdc-button');
+    buttons.forEach(button => mdc.ripple.MDCRipple.attachTo(button));
+    mdc.textField.MDCTextField.attachTo(document.querySelector('.mdc-text-field'));
 
-            // Initialize snackbar once
-            snackbar = mdc.snackbar.MDCSnackbar.attachTo(document.querySelector('.mdc-snackbar'));
+    // Initialize snackbar once
+    snackbar = mdc.snackbar.MDCSnackbar.attachTo(document.querySelector('.mdc-snackbar'));
 
-            // Initialize chart
-            const ctx = document.getElementById('lineChart').getContext('2d');
-            lineChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: Array.from({ length: 6001 }, (_, i) => i),
-                    datasets: [{
-                        label: 'Weight (grams)',
-                        data: [],
-                        borderColor: 'blue',
-                        fill: false,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    animation: { duration: 0 },
-                    transitions: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: {
-                            title: { display: true, text: 'Time (seconds)' },
-                            ticks: {
-                                callback: function (value, index) {
-                                    if (index % 100 === 0 && index <= 6000) {
-                                        return (index / 100);
-                                    }
-                                    return null;
-                                }
+    // Initialize chart
+    const ctx = document.getElementById('lineChart').getContext('2d');
+    lineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({ length: 6001 }, (_, i) => i),
+            datasets: [{
+                label: 'Weight (grams)',
+                data: [],
+                borderColor: 'blue',
+                fill: false,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            animation: { duration: 0 },
+            transitions: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Time (seconds)' },
+                    ticks: {
+                        callback: function (value, index) {
+                            if (index % 100 === 0 && index <= 6000) {
+                                return (index / 100);
                             }
-                        },
-                        y: {
-                            title: { display: true, text: 'Weight (grams)' },
-                            min: 0,
-                            max: 60
+                            return null;
                         }
                     }
+                },
+                y: {
+                    title: { display: true, text: 'Weight (grams)' },
+                    min: 0,
+                    max: 60
                 }
-            });
+            }
+        }
+    });
 
-            loadData();
-            startPolling();
-        };
+    loadData();  // Call once on load
+};
 
         document.getElementById('decrease').addEventListener('click', function () {
             const input = document.getElementById('extraction');
