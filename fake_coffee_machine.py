@@ -10,7 +10,7 @@ class CoffeeMachine:
         self.measurment_frequency = config.get('measurment_frequency')
         self.weight_graph = []
 
-    async def make_coffee(self):
+    async def make_coffee(self, extraction):
         self.weight_graph = []
         print('scale.zero_and_start')
         print('servo.press')
@@ -22,7 +22,7 @@ class CoffeeMachine:
             self.weight_graph.append(extraction_weight)
             print(extraction_weight)
 
-            if extraction_weight >= self.config.get('extraction'):
+            if extraction_weight >= extraction:
                 print('servo.press')
                 print('servo.not_ready')
                 break

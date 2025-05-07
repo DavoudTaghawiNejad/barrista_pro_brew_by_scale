@@ -11,13 +11,13 @@ class CoffeeMachine:
         self.servo.set_not_ready()
         self.scale = Scale()
 
-    async def make_coffee(self):
+    async def make_coffee(self, extraction):
         self.scale.zero_and_start()
         self.servo.press()
         self.servo.set_ready()
         while True:
             extraction_weight = self.scale.read_weight()
-            if extraction_weight >= self.config.get('extraction'):
+            if extraction_weight >= extraction:
                 self.servo.press()
                 self.servo.set_not_ready()
                 break
