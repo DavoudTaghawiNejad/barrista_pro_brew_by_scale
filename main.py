@@ -12,7 +12,7 @@ except ImportError:
     connect_wifi = lambda : None
     import json as ujson
     import asyncio
-    PORT = 5003
+    PORT = 5004
     HOST = 'localhost'
 print("Imports successful")  # Debug print after imports
 
@@ -68,7 +68,7 @@ async def main():
     try:
         connect_wifi()
         print('here')
-        await app.start_server(HOST, port=PORT)
+        await app.start_server(HOST, port=PORT, debug=True)
         print('andhere')
     except Exception as e:
         print(f"Error starting server: {e}")
