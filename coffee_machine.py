@@ -3,7 +3,7 @@ import utime as time
 from switch_servo import SwitchServo
 from scale import Scale
 
-class CoffeMachine:
+class CoffeeMachine:
     def __init__(self, config):
         self.storage = config
         self.measurment_frequency = config.get('measurment_frequency')
@@ -22,7 +22,7 @@ class CoffeMachine:
                 self.servo.press()
                 self.servo.set_not_ready()
                 break
-            await asyncio.sleep(self.measurment_frequency)
+            await asyncio.sleep(10 / 1000)
 
     def programm_preinfusion(self, preinfusion_time=20):
         self.servo.press()
