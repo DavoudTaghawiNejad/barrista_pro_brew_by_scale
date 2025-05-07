@@ -17,7 +17,8 @@ except ImportError:
 print("Imports successful")  # Debug print after imports
 
 from storage import Storage
-from coffee_storage import CoffeeStorage  # Keep the import
+from coffee_storage import CoffeeStorage
+
 
 with open('webpage.html', 'r') as f:
     HTML = f.read()
@@ -27,6 +28,8 @@ app = Microdot()
 config = Storage(filename='config.json')
 coffee_storage = CoffeeStorage(filename='coffee.json')
 coffee_machine = CoffeeMachine(config)
+last_time_storage = Storage(filename='last_time.json')
+
 
 @app.route('/')
 async def index(request):
@@ -56,6 +59,12 @@ async def make_coffee(request):
         data = request.json
         extraction = round(float(data['extraction']), 1)
         await coffee_machine.make_coffee(extraction)
+
+        # Save the last brewed coffee
+        coffee_name = data.get('name')  # Assuming the name is sent in the request
+        if coffee_name:
+            last_time_storage.set('last_brewed', coffee_name)
+
         return {'status': 'success'}, 200
     except (KeyError, ValueError):
         return {'status': 'error', 'message': 'Invalid data'}, 400
@@ -95,6 +104,15 @@ async def update_coffee(request):
             return {'status': 'error', 'message': 'Coffee not found'}, 404
     except Exception as e:
         return {'status': 'error', 'message': str(e)}, 400
+
+@app.route('/get_last_brewed')
+async def get_last_brewed(request):
+
+    last_brewed = last_time_storage.get('last_brewed')
+    print("LAST COFFE REQUESTED")
+    print(last_brewed)
+    return {'last_brewed': last_brewed}, 200, {'Content-Type': 'application/json'}
+
 
 async def main():
     try:

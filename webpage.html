@@ -197,13 +197,14 @@ async function addNewCoffee() {
 }
 
 async function makeCoffee() {
+    const selectedCoffee = document.getElementById('coffeeSelect').value;
     const extraction = document.getElementById('extraction').value;
     isMakingCoffee = true;  // Start making coffee
     startPolling();  // Only if not already polling
     const response = await fetch('/make_coffee', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ extraction })
+        body: JSON.stringify({ name: selectedCoffee, extraction })
     });
     if (response.ok) {
         isMakingCoffee = false;  // Coffee making finished
@@ -224,7 +225,25 @@ function startPolling() {
 }
 
 window.onload = function () {
-    loadCoffees();  // Load coffees on page load
+    loadCoffees().then(() => {
+        // Fetch and set last brewed coffee after coffees are loaded
+        async function fetchLastBrewed() {
+            try {
+                const response = await fetch('/get_last_brewed');
+                if (response.ok) {
+                    const data = await response.json();
+                    const lastBrewed = data.last_brewed;
+                    if (lastBrewed) {
+                        document.getElementById('coffeeSelect').value = lastBrewed;
+                        document.getElementById('coffeeSelect').dispatchEvent(new Event('change'));  // Trigger change to populate fields
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching last brewed coffee:", error);
+            }
+        }
+        fetchLastBrewed();  // Call the function after loadCoffees, thanks to .then
+    });
     document.getElementById('coffeeSelect').addEventListener('change', async function() {
         const selectedCoffeeName = this.value;
         if (selectedCoffeeName) {
