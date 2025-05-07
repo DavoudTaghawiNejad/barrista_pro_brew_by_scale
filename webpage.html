@@ -48,7 +48,7 @@
         lineChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: Array.from({length: 60}, (_, i) => i),
+                labels: Array.from({length: 6001}, (_, i) => i),  // Match the expected data length for 6000 points
                 datasets: [{
                     label: 'Weight (grams)',
                     data: [],
@@ -63,15 +63,25 @@
                 },
                 transitions: false,  // Disable transitions
                 scales: {
-                    x: { title: { display: true, text: 'Time (seconds)' } },
-                    y: { title: { display: true, text: 'Weight (grams)' }, min: 0, max: 60 }
+                    x: {
+    title: { display: true, text: 'Time (seconds)' },
+ticks: {
+    callback: function(value, index) {
+        if (index % 100 === 0 && index <= 6000) {  // Ensure up to 60 seconds with 100 points each
+            return (index / 100);
+        }
+        return null;
+    }
+}
+},
+                    y: { title: { display: true, text: 'Weight (grams)' }, min: 0, max: 60}
                 }
             }
         });
 
         function startPolling() {
             if (pollInterval) clearInterval(pollInterval);
-            pollInterval = setInterval(loadData, 10);  // Poll every 0.01 seconds
+            pollInterval = setInterval(loadData, 10);  // Poll every 1 second to slow down updates
         }
 
         window.onload = function() {
