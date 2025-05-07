@@ -12,7 +12,7 @@ except ImportError:
     connect_wifi = lambda : None
     import json as ujson
     import asyncio
-    PORT = 5007
+    PORT = 5008
     HOST = 'localhost'
 print("Imports successful")  # Debug print after imports
 
@@ -62,7 +62,7 @@ async def make_coffee(request):
 async def main():
     try:
         connect_wifi()
-        print('here')
+        print(f'http://{HOST}:{PORT}')
         await app.start_server(HOST, port=PORT)
         print('andhere')
     except Exception as e:
