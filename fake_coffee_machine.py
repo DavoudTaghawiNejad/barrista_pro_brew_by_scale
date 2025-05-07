@@ -4,7 +4,7 @@ from random import random
 import json
 
 
-class CoffeMachine:
+class CoffeeMachine:
     def __init__(self, config):
         self.storage = config
         self.measurment_frequency = config.get('measurment_frequency')

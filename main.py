@@ -4,11 +4,11 @@ try:
     import uasyncio as asyncio
     from scale import read_load_cell, update_data
     from network_tools import connect_wifi
-    from coffee_machine import CoffeMachine
+    from coffee_machine import CoffeeMachine
     PORT = 80
     HOST = '0.0.0.0'
 except ImportError:
-    from fake_coffee_machine import CoffeMachine
+    from fake_coffee_machine import CoffeeMachine
     connect_wifi = lambda : None
     import json as ujson
     import asyncio
@@ -24,7 +24,7 @@ with open('webpage.html', 'r') as f:
 app = Microdot()
 
 config = Storage(filename='config.json')
-coffee_machine = CoffeMachine(config)
+coffee_machine = CoffeeMachine(config)
 
 @app.route('/')
 async def index(request):
