@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>ESP32 Sensor Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -28,14 +28,30 @@
         </div>
     </div>
     <script>
+        let lineChart;
+        let pollInterval;  // For polling data
+
+        async function loadData() {
+            try {
+                const response = await fetch('/get_chart_data');  // Fetch from new API endpoint
+                if (!response.ok) throw new Error('Network response was not ok');
+                const chartData = await response.json();  // Directly get JSON data
+                lineChart.data.datasets[0].data = chartData;
+                lineChart.update();
+            } catch (error) {
+                console.error("Error loading data:", error);
+                alert("Failed to load data. Please try again.");
+            }
+        }
+
         const ctx = document.getElementById('lineChart').getContext('2d');
-        const lineChart = new Chart(ctx, {
+        lineChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: Array.from({length: 60}, (_, i) => i),
                 datasets: [{
                     label: 'Weight (grams)',
-                    data: {{chart_data}},
+                    data: [],
                     borderColor: 'blue',
                     fill: false
                 }]
@@ -48,6 +64,8 @@
             }
         });
 
+        window.onload = loadData;  // Load data on page load
+
         async function updateValues() {
             const preinfusion = document.getElementById('preinfusion').value;
             const extraction = document.getElementById('extraction').value;
@@ -58,6 +76,9 @@
             });
             if (response.ok) {
                 alert('Values updated!');
+                await loadData();  // Reload data after update
+            } else {
+                alert('Update failed. Please try again.');
             }
         }
 
@@ -68,8 +89,16 @@
                 body: JSON.stringify({})
             });
             if (response.ok) {
-                alert('Coffee making started!');
+                // alert('Coffee making started!');
+                startPolling();  // Start polling for real-time updates
+            } else {
+                console.print(response)
             }
+        }
+
+        function startPolling() {
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(loadData, 1000);  // Poll every second
         }
     </script>
 </body>

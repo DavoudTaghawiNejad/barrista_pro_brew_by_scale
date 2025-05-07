@@ -12,7 +12,7 @@ except ImportError:
     connect_wifi = lambda : None
     import json as ujson
     import asyncio
-    PORT = 5002
+    PORT = 5003
     HOST = 'localhost'
 print("Imports successful")  # Debug print after imports
 
@@ -26,7 +26,6 @@ app = Microdot()
 config = Storage(filename='config.json')
 coffee_machine = CoffeMachine(config)
 
-
 @app.route('/')
 async def index(request):
     chart_data = coffee_machine.get_chart_json()
@@ -37,14 +36,18 @@ async def index(request):
     print(f"Preinfusion: {preinfusion}")  # Debug print
     print(f"Extraction: {extraction}")  # Debug print
     print(f"Servo angle: {servo_angle}")  # Debug print
-    html = HTML.replace('{{chart_data}}', chart_data)
+    html = HTML.replace('{{chart_data}}', str(chart_data))  # Ensure string for replacement
     html = html.replace('{{preinfusion}}', preinfusion)
     html = html.replace('{{extraction}}', extraction)
     html = html.replace('{{servo_angle}}', servo_angle)
     print(f"Generated HTML length: {len(html)}")  # Debug print for HTML length
     return Response(html, headers={'Content-Type': 'text/html'})
 
-# Route to handle updates
+@app.route('/get_chart_data')
+async def get_chart_data(request):
+    chart_data = coffee_machine.get_chart_json()
+    return chart_data, 200, {'Content-Type': 'application/json'}
+
 @app.route('/update', methods=['POST'])
 async def update(request):
     try:
