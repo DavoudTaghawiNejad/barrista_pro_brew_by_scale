@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <title>Barrista Uber - by Davoud Taghawi-Nejad</title>
-    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <link href="https://unpkg.com/material-components-web@14.0.0/dist/material-components-web.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/material-components-web@14.0.0/dist/material-components-web.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
@@ -14,97 +14,53 @@
     </style>
 </head>
 <body>
+    <div class="mdc-snackbar">
+        <div class="mdc-snackbar__surface">
+            <div class="mdc-snackbar__label" role="status" aria-live="polite"></div>
+            <div class="mdc-snackbar__actions">
+                <button type="button" class="mdc-button mdc-snackbar__action">
+                    <div class="mdc-button__ripple"></div>
+                    <span class="mdc-button__label">Dismiss</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <h1>Barrista Uber - by Davoud Taghawi-Nejad</h1>
         <canvas id="lineChart" width="400" height="200"></canvas>
         <div class="controls">
             <h3>Adjust Values</h3>
             <label>Extraction (grams):</label>
-            <button class="mdc-filled-button" id="decrease">-</button>
-            <input type="number" id="extraction" min="0" max="100" value="{{extraction}}" step="1">
-            <button class="mdc-filled-button" id="increase">+</button>
+            <button class="mdc-button mdc-button--raised" id="decrease">-</button>
+            <input type="number" id="extraction" min="0" max="100" value="30" step="1">
+            <button class="mdc-button mdc-button--raised" id="increase">+</button>
             <br><br>
-            <button class="mdc-filled-button" onclick="updateValues()">Update</button>
-            <button class="mdc-filled-button" onclick="makeCoffee()">Make Coffee</button>
+            <button class="mdc-button mdc-button--filled" onclick="updateValues()">Update</button>
+            <button class="mdc-button mdc-button--filled" onclick="makeCoffee()">Make Coffee</button>
         </div>
     </div>
+
     <script>
         let lineChart;
-        let pollInterval;  // For polling data
+        let pollInterval;
+        let snackbar;
 
-        /**
- * Asynchronously fetches chart data from the server and updates the chart.
- * @async (this function runs asynchronously, allowing it to wait for the server response without blocking other parts of the page.)
- * @function loadData
- */
-async function loadData() {
+        async function loadData() {
             try {
                 const response = await fetch('/get_chart_data');
                 if (!response.ok) throw new Error('Network response was not ok');
                 const chartData = await response.json();
                 lineChart.data.datasets[0].data = chartData;
-                lineChart.update({ duration: 0 });  // Force instant update
+                lineChart.update({ duration: 0 });
             } catch (error) {
                 console.error("Error loading data:", error);
-                alert("Failed to load data. Please try again.");
+                snackbar.labelText = 'Failed to load data. Please try again.';
+                snackbar.open();
             }
         }
 
-        const ctx = document.getElementById('lineChart').getContext('2d');
-        lineChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: Array.from({length: 6001}, (_, i) => i),  // Match the expected data length for 6000 points
-                datasets: [{
-                    label: 'Weight (grams)',
-                    data: [],
-                    borderColor: 'blue',
-                    fill: false,
-                    pointRadius: 0  // Hide points
-                }]
-            },
-            options: {
-                animation: {
-                    duration: 0  // Explicitly disable all animations
-                },
-    transitions: false,  // Disable transitions
-    legend: { display: false },
-    scales: {
-                    x: {
-    title: { display: true, text: 'Time (seconds)' },
-ticks: {
-    callback: function(value, index) {
-        if (index % 100 === 0 && index <= 6000) {  // Ensure up to 60 seconds with 100 points each
-            return (index / 100);
-        }
-        return null;
-    }
-}
-},
-                    y: { title: { display: true, text: 'Weight (grams)' }, min: 0, max: 60}
-                }
-            }
-        });
-
-function startPolling() {
-    if (pollInterval) {  // Check if an interval is already set
-        clearInterval(pollInterval);  // Clear the existing interval to prevent duplicates
-    }
-    pollInterval = setInterval(loadData, 10);  // Set a new interval to poll data every 10ms (as per code, though comment suggests 1 second)
-}
-
-        window.onload = function() {
-            loadData();
-            startPolling();
-        };
-
-        /**
- * Asynchronously updates the preinfusion and extraction values on the server via a POST request.
- * @async (this function runs asynchronously, allowing it to wait for the server response without blocking other parts of the page.)
- * @function updateValues
- * @returns {Promise<void>} This indicates the function returns a promise that resolves when the operation is done, and it will display an alert to the user if the update succeeds or fails.
- */
-async function updateValues() {
+        async function updateValues() {
             const extraction = document.getElementById('extraction').value;
             const response = await fetch('/update', {
                 method: 'POST',
@@ -112,46 +68,98 @@ async function updateValues() {
                 body: JSON.stringify({ extraction })
             });
             if (response.ok) {
-                alert('Values updated!');
+                snackbar.labelText = 'Values updated!';
+                snackbar.open();
                 loadData();
             } else {
-                alert('Update failed. Please try again.');
+                snackbar.labelText = 'Update failed. Please try again.';
+                snackbar.open();
             }
         }
 
-        /**
- * Sends a request to the server to start the coffee-making process.
- * @async (this function runs asynchronously, allowing it to wait for the server response without blocking other parts of the page.)
- * @function makeCoffee
- * @returns {Promise<void>} Shows an alert on success or failure.
- */
-async function makeCoffee() {
+        async function makeCoffee() {
             const extraction = document.getElementById('extraction').value;
-            alert('Sending extraction value: ' + extraction);  // Debug alert to verify value
             const response = await fetch('/make_coffee', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ extraction })
             });
             if (response.ok) {
-                alert('Coffee making started!');
+                snackbar.labelText = 'Coffee making started!';
+                snackbar.open();
             } else {
-                alert('Coffee making failed. Please try again.');
+                snackbar.labelText = 'Coffee making failed. Please try again.';
+                snackbar.open();
             }
         }
 
-// Add event listeners for buttons
-document.getElementById('decrease').addEventListener('click', function() {
-    const input = document.getElementById('extraction');
-    let value = parseInt(input.value) || 0;
-    if (value > 0) input.value = value - 1;
-});
+        function startPolling() {
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(loadData, 10);
+        }
 
-document.getElementById('increase').addEventListener('click', function() {
-    const input = document.getElementById('extraction');
-    let value = parseInt(input.value) || 0;
-    if (value < 100) input.value = value + 1;
-});
+        window.onload = function () {
+            // Initialize MDC buttons
+            const buttons = document.querySelectorAll('.mdc-button');
+            buttons.forEach(button => mdc.ripple.MDCRipple.attachTo(button));
+
+            // Initialize snackbar once
+            snackbar = mdc.snackbar.MDCSnackbar.attachTo(document.querySelector('.mdc-snackbar'));
+
+            // Initialize chart
+            const ctx = document.getElementById('lineChart').getContext('2d');
+            lineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: 6001 }, (_, i) => i),
+                    datasets: [{
+                        label: 'Weight (grams)',
+                        data: [],
+                        borderColor: 'blue',
+                        fill: false,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    animation: { duration: 0 },
+                    transitions: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Time (seconds)' },
+                            ticks: {
+                                callback: function (value, index) {
+                                    if (index % 100 === 0 && index <= 6000) {
+                                        return (index / 100);
+                                    }
+                                    return null;
+                                }
+                            }
+                        },
+                        y: {
+                            title: { display: true, text: 'Weight (grams)' },
+                            min: 0,
+                            max: 60
+                        }
+                    }
+                }
+            });
+
+            loadData();
+            startPolling();
+        };
+
+        document.getElementById('decrease').addEventListener('click', function () {
+            const input = document.getElementById('extraction');
+            let value = parseInt(input.value) || 0;
+            if (value > 0) input.value = value - 1;
+        });
+
+        document.getElementById('increase').addEventListener('click', function () {
+            const input = document.getElementById('extraction');
+            let value = parseInt(input.value) || 0;
+            if (value < 100) input.value = value + 1;
+        });
     </script>
 </body>
 </html>

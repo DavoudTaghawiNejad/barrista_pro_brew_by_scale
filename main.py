@@ -31,7 +31,7 @@ async def index(request):
     chart_data = coffee_machine.get_chart_json()
     extraction = str(config.get('extraction'))
     html = HTML.replace('{{chart_data}}', str(chart_data))  # Ensure string for replacement
-    html = html.replace('{{extraction}}', str(int(extraction)))
+    html = html.replace('{{extraction}}', str(int(float(extraction))))
     return Response(html, headers={'Content-Type': 'text/html'})
 
 @app.route('/get_chart_data')
