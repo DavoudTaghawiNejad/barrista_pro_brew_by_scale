@@ -33,11 +33,11 @@
 
         async function loadData() {
             try {
-                const response = await fetch('/get_chart_data');  // Fetch from new API endpoint
+                const response = await fetch('/get_chart_data');
                 if (!response.ok) throw new Error('Network response was not ok');
-                const chartData = await response.json();  // Directly get JSON data
+                const chartData = await response.json();
                 lineChart.data.datasets[0].data = chartData;
-                lineChart.update();
+                lineChart.update({ duration: 0 });  // Force instant update
             } catch (error) {
                 console.error("Error loading data:", error);
                 alert("Failed to load data. Please try again.");
@@ -53,10 +53,15 @@
                     label: 'Weight (grams)',
                     data: [],
                     borderColor: 'blue',
-                    fill: false
+                    fill: false,
+                    pointRadius: 0  // Hide points
                 }]
             },
             options: {
+                animation: {
+                    duration: 0  // Explicitly disable all animations
+                },
+                transitions: false,  // Disable transitions
                 scales: {
                     x: { title: { display: true, text: 'Time (seconds)' } },
                     y: { title: { display: true, text: 'Weight (grams)' }, min: 0, max: 60 }
@@ -64,7 +69,15 @@
             }
         });
 
-        window.onload = loadData;  // Load data on page load
+        function startPolling() {
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(loadData, 10);  // Poll every 0.01 seconds
+        }
+
+        window.onload = function() {
+            loadData();
+            startPolling();
+        };
 
         async function updateValues() {
             const preinfusion = document.getElementById('preinfusion').value;
@@ -76,7 +89,7 @@
             });
             if (response.ok) {
                 alert('Values updated!');
-                await loadData();  // Reload data after update
+                loadData();
             } else {
                 alert('Update failed. Please try again.');
             }
@@ -89,16 +102,10 @@
                 body: JSON.stringify({})
             });
             if (response.ok) {
-                // alert('Coffee making started!');
-                startPolling();  // Start polling for real-time updates
+                alert('Coffee making started!');
             } else {
-                console.print(response)
+                alert('Coffee making failed. Please try again.');
             }
-        }
-
-        function startPolling() {
-            if (pollInterval) clearInterval(pollInterval);
-            pollInterval = setInterval(loadData, 1000);  // Poll every second
         }
     </script>
 </body>
