@@ -215,7 +215,6 @@ window.onload = function () {
     const buttons = document.querySelectorAll('.mdc-button');
     buttons.forEach(button => mdc.ripple.MDCRipple.attachTo(button));
     mdc.textField.MDCTextField.attachTo(document.querySelector('.mdc-text-field'));
-    mdc.select.MDCSelect.attachTo(document.querySelector('.mdc-select'));  // Initialize select if needed
 
     // Initialize snackbar once
     snackbar = mdc.snackbar.MDCSnackbar.attachTo(document.querySelector('.mdc-snackbar'));
