@@ -51,7 +51,7 @@ async def get_chart_data(request):
 @app.route('/update', methods=['POST'])
 async def update(request):
     try:
-        data = request.ujson
+        data = request.json
         config.set('extraction', round(float(data['extraction']), 1))
         return {'status': 'success'}, 200
     except (KeyError, ValueError):
