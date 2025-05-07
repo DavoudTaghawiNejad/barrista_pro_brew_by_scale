@@ -12,7 +12,7 @@ except ImportError:
     connect_wifi = lambda : None
     import json as ujson
     import asyncio
-    PORT = 5004
+    PORT = 5006
     HOST = 'localhost'
 print("Imports successful")  # Debug print after imports
 
@@ -52,17 +52,21 @@ async def get_chart_data(request):
 async def update(request):
     try:
         data = request.ujson
-        config.set('preinfusion', round(float(data['preinfusion']), 1))
         config.set('extraction', round(float(data['extraction']), 1))
-        config.set('servo_angle', int(data['servo_angle']))
         return {'status': 'success'}, 200
     except (KeyError, ValueError):
         return {'status': 'error', 'message': 'Invalid data'}, 400
 
 @app.route('/make_coffee', methods=['POST'])
 async def make_coffee(request):
-    await coffee_machine.make_coffee()
-    return {'status': 'success'}, 200
+    try:
+        data = request.json  # Assuming JSON parsing
+        if 'extraction' in data:
+            config.set('extraction', round(float(data['extraction']), 1))  # Same as /update
+        await coffee_machine.make_coffee()  # Proceed after update
+        return {'status': 'success'}, 200
+    except (KeyError, ValueError):
+        return {'status': 'error', 'message': 'Invalid data'}, 400
 
 async def main():
     try:
