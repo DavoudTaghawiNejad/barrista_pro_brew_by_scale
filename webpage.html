@@ -11,6 +11,16 @@
         .controls { margin: 20px 0; }
         input { width: 100px; text-align: center; }
         canvas { max-width: 100%; }
+        /* Hide number input spin buttons (Chrome, Safari, Edge) */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+        }
+        /* Hide number input spin buttons (Firefox) */
+        input[type=number] {
+        -moz-appearance: textfield;
+        }
     </style>
 </head>
 <body>
@@ -33,7 +43,16 @@
             <h3>Adjust Values</h3>
             <label>Extraction (grams):</label>
             <button class="mdc-button mdc-button--raised" id="decrease">-</button>
-            <input type="number" id="extraction" min="0" max="100" value="30" step="1">
+            <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
+                <input type="number" id="extraction" class="mdc-text-field__input" min="0" max="100" value="{{extraction}}" step="1">
+                <span class="mdc-notched-outline">
+                  <span class="mdc-notched-outline__leading"></span>
+                  <span class="mdc-notched-outline__notch">
+                    <span class="mdc-floating-label">Grams</span>
+                  </span>
+                  <span class="mdc-notched-outline__trailing"></span>
+                </span>
+              </label>
             <button class="mdc-button mdc-button--raised" id="increase">+</button>
             <br><br>
             <button class="mdc-button mdc-button--filled" onclick="updateValues()">Update</button>
@@ -102,6 +121,7 @@
             // Initialize MDC buttons
             const buttons = document.querySelectorAll('.mdc-button');
             buttons.forEach(button => mdc.ripple.MDCRipple.attachTo(button));
+            mdc.textField.MDCTextField.attachTo(document.querySelector('.mdc-text-field'));
 
             // Initialize snackbar once
             snackbar = mdc.snackbar.MDCSnackbar.attachTo(document.querySelector('.mdc-snackbar'));
