@@ -5,9 +5,8 @@ from scale import Scale
 
 class CoffeeMachine:
     def __init__(self, config):
-        self.storage = config
+        self.config = config
         self.measurment_frequency = config.get('measurment_frequency')
-        self.dose_in_gram = self.storage.get('dose_in_gram')
         self.servo = SwitchServo()
         self.servo.set_not_ready()
         self.scale = Scale()
@@ -18,7 +17,7 @@ class CoffeeMachine:
         self.servo.set_ready()
         while True:
             extraction_weight = self.scale.read_weight()
-            if extraction_weight >= self.dose_in_gram:
+            if extraction_weight >= self.config.get('extraction'):
                 self.servo.press()
                 self.servo.set_not_ready()
                 break
@@ -30,7 +29,7 @@ class CoffeeMachine:
         self.servo.set_ready()
         time.sleep(60)
         self.servo.set_not_ready()
-        self.storage.set(preinfusion_time)
+        self.config.set(preinfusion_time)
 
     def get_chart_json(self):
         self.scale.get_chart_json(self)

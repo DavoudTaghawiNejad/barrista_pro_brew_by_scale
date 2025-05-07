@@ -6,9 +6,8 @@ import json
 
 class CoffeeMachine:
     def __init__(self, config):
-        self.storage = config
+        self.config = config
         self.measurment_frequency = config.get('measurment_frequency')
-        self.extraction = self.storage.get('extraction')
         self.weight_graph = []
 
     async def make_coffee(self):
@@ -23,7 +22,7 @@ class CoffeeMachine:
             self.weight_graph.append(extraction_weight)
             print(extraction_weight)
 
-            if extraction_weight >= self.extraction:
+            if extraction_weight >= self.config.get('extraction'):
                 print('servo.press')
                 print('servo.not_ready')
                 break
@@ -35,7 +34,7 @@ class CoffeeMachine:
         print('servo.ready')
         time.sleep(60)
         print('servo.set_not_ready')
-        self.storage.set(preinfusion)
+        self.config.set(preinfusion)
 
     def get_chart_json(self):
         return json.dumps(self.weight_graph)
