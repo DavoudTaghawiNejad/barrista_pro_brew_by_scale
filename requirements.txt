@@ -1,0 +1,2 @@
+microdot==2.3.1
+microdot_asyncio==0.5.0

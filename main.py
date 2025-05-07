@@ -1,0 +1,75 @@
+from microdot import Microdot, Response
+try:
+    import ujson
+    import uasyncio as asyncio
+    from scale import read_load_cell, update_data
+    from network_tools import connect_wifi
+    from coffee_machine import CoffeMachine
+    PORT = 80
+    HOST = '0.0.0.0'
+except ImportError:
+    from fake_coffee_machine import CoffeMachine
+    connect_wifi = lambda : None
+    import json as ujson
+    import asyncio
+    PORT = 5002
+    HOST = 'localhost'
+print("Imports successful")  # Debug print after imports
+
+from storage import Storage
+
+with open('webpage.html', 'r') as f:
+    HTML = f.read()
+
+app = Microdot()
+
+config = Storage(filename='config.json')
+coffee_machine = CoffeMachine(config)
+
+
+@app.route('/')
+async def index(request):
+    chart_data = coffee_machine.get_chart_json()
+    preinfusion = str(config.get('preinfusion'))
+    extraction = str(config.get('extraction'))
+    servo_angle = str(config.get('servo_angle'))
+    print(f"Chart data: {chart_data}")  # Debug print
+    print(f"Preinfusion: {preinfusion}")  # Debug print
+    print(f"Extraction: {extraction}")  # Debug print
+    print(f"Servo angle: {servo_angle}")  # Debug print
+    html = HTML.replace('{{chart_data}}', chart_data)
+    html = html.replace('{{preinfusion}}', preinfusion)
+    html = html.replace('{{extraction}}', extraction)
+    html = html.replace('{{servo_angle}}', servo_angle)
+    print(f"Generated HTML length: {len(html)}")  # Debug print for HTML length
+    return Response(html, headers={'Content-Type': 'text/html'})
+
+# Route to handle updates
+@app.route('/update', methods=['POST'])
+async def update(request):
+    try:
+        data = request.ujson
+        config.set('preinfusion', round(float(data['preinfusion']), 1))
+        config.set('extraction', round(float(data['extraction']), 1))
+        config.set('servo_angle', int(data['servo_angle']))
+        return {'status': 'success'}, 200
+    except (KeyError, ValueError):
+        return {'status': 'error', 'message': 'Invalid data'}, 400
+
+@app.route('/make_coffee', methods=['POST'])
+async def make_coffee(request):
+    await coffee_machine.make_coffee()
+    return {'status': 'success'}, 200
+
+async def main():
+    try:
+        connect_wifi()
+        print('here')
+        await app.start_server(HOST, port=PORT)
+        print('andhere')
+    except Exception as e:
+        print(f"Error starting server: {e}")
+        import sys
+        sys.exit(1)
+
+asyncio.run(main())

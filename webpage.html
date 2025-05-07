@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ESP32 Sensor Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { max-width: 800px; margin: auto; padding: 20px; }
+        .controls { margin: 20px 0; }
+        input { width: 100px; text-align: center; }
+        canvas { max-width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ESP32 Sensor Dashboard</h1>
+        <canvas id="lineChart" width="400" height="200"></canvas>
+        <div class="controls">
+            <h3>Adjust Values</h3>
+            <label>Preinfusion (grams):</label>
+            <input type="number" id="preinfusion" value="{{preinfusion}}" step="0.1">
+            <br><br>
+            <label>Extraction (grams):</label>
+            <input type="number" id="extraction" value="{{extraction}}" step="0.1">
+            <br><br>
+            <button onclick="updateValues()">Update</button>
+            <button onclick="makeCoffee()">Make Coffee</button>
+        </div>
+    </div>
+    <script>
+        const ctx = document.getElementById('lineChart').getContext('2d');
+        const lineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 60}, (_, i) => i),
+                datasets: [{
+                    label: 'Weight (grams)',
+                    data: {{chart_data}},
+                    borderColor: 'blue',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: 'Time (seconds)' } },
+                    y: { title: { display: true, text: 'Weight (grams)' }, min: 0, max: 60 }
+                }
+            }
+        });
+
+        async function updateValues() {
+            const preinfusion = document.getElementById('preinfusion').value;
+            const extraction = document.getElementById('extraction').value;
+            const response = await fetch('/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ preinfusion, extraction })
+            });
+            if (response.ok) {
+                alert('Values updated!');
+            }
+        }
+
+        async function makeCoffee() {
+            const response = await fetch('/make_coffee', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
+            if (response.ok) {
+                alert('Coffee making started!');
+            }
+        }
+    </script>
+</body>
+</html>
