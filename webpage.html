@@ -39,25 +39,40 @@
     <div class="container">
         <h1>Barrista Uber - by Davoud Taghawi-Nejad</h1>
         <canvas id="lineChart" width="400" height="200"></canvas>
-        <div class="controls">
-            <h3>Adjust Values</h3>
-            <label>Extraction (grams):</label>
-            <button class="mdc-button mdc-button--raised" id="decrease">-</button>
-            <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
-                <input type="number" id="extraction" class="mdc-text-field__input" min="0" max="100" value="{{extraction}}" step="1">
-                <span class="mdc-notched-outline">
-                  <span class="mdc-notched-outline__leading"></span>
-                  <span class="mdc-notched-outline__notch">
-                    <span class="mdc-floating-label">Grams</span>
-                  </span>
-                  <span class="mdc-notched-outline__trailing"></span>
-                </span>
-              </label>
-            <button class="mdc-button mdc-button--raised" id="increase">+</button>
-            <br><br>
-            <button class="mdc-button mdc-button--outlined" onclick="updateValues()">Update</button>
-            <button class="mdc-button mdc-button--raised" onclick="makeCoffee()">Make Coffee</button>
-        </div>
+<div class="controls">
+    <h3>Select or Create Coffee</h3>
+    <label for="coffeeSelect">Coffee Profile:</label>
+    <select id="coffeeSelect" class="mdc-select">
+        <option value="">Select or Add Coffee</option>
+        <!-- Options will be populated dynamically -->
+    </select>
+    <!-- Removed Load Coffees button -->
+    <button class="mdc-button mdc-button--outlined" onclick="addNewCoffee()">Add New Coffee</button>
+    <br><br>
+    <h3>Adjust Values</h3>
+    <label>Dose (grams):</label>
+    <input type="number" id="dose" step="0.1" min="0" style="width: 100px;">
+    <br><br>
+    <label>Grind Size:</label>
+    <input type="number" id="grind_size" step="1" min="0" style="width: 100px;">
+    <br><br>
+    <label>Extraction (grams):</label>
+    <button class="mdc-button mdc-button--raised" id="decrease">-</button>
+    <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
+        <input type="number" id="extraction" class="mdc-text-field__input" min="0" max="100" value="{{extraction}}" step="1">
+        <span class="mdc-notched-outline">
+          <span class="mdc-notched-outline__leading"></span>
+          <span class="mdc-notched-outline__notch">
+            <span class="mdc-floating-label">Grams</span>
+          </span>
+          <span class="mdc-notched-outline__trailing"></span>
+        </span>
+      </label>
+    <button class="mdc-button mdc-button--raised" id="increase">+</button>
+    <br><br>
+    <button class="mdc-button mdc-button--outlined" onclick="updateValues()">Remember Coffee</button>
+    <button class="mdc-button mdc-button--raised" onclick="makeCoffee()">Make Coffee</button>
+</div>
     </div>
 
     <script>
@@ -80,22 +95,73 @@ let snackbar;
             }
         }
 
-        async function updateValues() {
-            const extraction = document.getElementById('extraction').value;
-            const response = await fetch('/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ extraction })
-            });
-            if (response.ok) {
-                snackbar.labelText = 'Values updated!';
-                snackbar.open();
-                loadData();
-            } else {
-                snackbar.labelText = 'Update failed. Please try again.';
-                snackbar.open();
-            }
+async function updateValues() {
+    const selectedCoffee = document.getElementById('coffeeSelect').value;
+    const dose = document.getElementById('dose').value;
+    const grind_size = document.getElementById('grind_size').value;
+    const extraction = document.getElementById('extraction').value;
+
+    if (selectedCoffee) {
+        const data = { name: selectedCoffee };
+        if (dose) data.dose = dose;
+        if (grind_size) data.grind_size = grind_size;
+        if (extraction) data.extraction = extraction;
+
+        const response = await fetch('/update_coffee', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (response.ok) {
+            snackbar.labelText = 'Coffee updated!';
+            snackbar.open();
+            loadData();
+        } else {
+            snackbar.labelText = 'Update failed. Please try again.';
+            snackbar.open();
         }
+    } else {
+        snackbar.labelText = 'Please select a coffee first.';
+        snackbar.open();
+    }
+}
+
+async function loadCoffees() {
+    const response = await fetch('/get_coffees');
+    if (response.ok) {
+        const data = await response.json();
+        const select = document.getElementById('coffeeSelect');
+        select.innerHTML = '<option value="">Select Coffee</option>';
+        data.coffees.forEach(coffee => {
+            const option = document.createElement('option');
+            option.value = coffee.name;
+            option.text = coffee.name;
+            select.appendChild(option);
+        });
+    } else {
+        snackbar.labelText = 'Failed to load coffees.';
+        snackbar.open();
+    }
+}
+
+async function addNewCoffee() {
+    const name = prompt('Enter name for new coffee:');
+    if (name) {
+        const response = await fetch('/add_coffee', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name })
+        });
+        if (response.ok) {
+            snackbar.labelText = 'New coffee added!';
+            snackbar.open();
+            loadCoffees();  // Reload coffees
+        } else {
+            snackbar.labelText = 'Failed to add coffee.';
+            snackbar.open();
+        }
+    }
+}
 
 async function makeCoffee() {
     const extraction = document.getElementById('extraction').value;
@@ -125,10 +191,31 @@ function startPolling() {
 }
 
 window.onload = function () {
+    loadCoffees();  // Load coffees on page load
+    document.getElementById('coffeeSelect').addEventListener('change', async function() {
+        const selectedCoffeeName = this.value;
+        if (selectedCoffeeName) {
+            const response = await fetch('/get_coffees');
+            if (response.ok) {
+                const data = await response.json();
+                const selectedCoffee = data.coffees.find(coffee => coffee.name === selectedCoffeeName);
+                if (selectedCoffee) {
+                    document.getElementById('dose').value = selectedCoffee.dose;
+                    document.getElementById('grind_size').value = selectedCoffee.grind_size;
+                    document.getElementById('extraction').value = selectedCoffee.extraction;
+                }
+            }
+        } else {
+            document.getElementById('dose').value = '';
+            document.getElementById('grind_size').value = '';
+            document.getElementById('extraction').value = '';
+        }
+    });
     // Initialize MDC buttons
     const buttons = document.querySelectorAll('.mdc-button');
     buttons.forEach(button => mdc.ripple.MDCRipple.attachTo(button));
     mdc.textField.MDCTextField.attachTo(document.querySelector('.mdc-text-field'));
+    mdc.select.MDCSelect.attachTo(document.querySelector('.mdc-select'));  // Initialize select if needed
 
     // Initialize snackbar once
     snackbar = mdc.snackbar.MDCSnackbar.attachTo(document.querySelector('.mdc-snackbar'));

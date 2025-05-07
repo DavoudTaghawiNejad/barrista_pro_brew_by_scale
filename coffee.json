@@ -1,0 +1,16 @@
+{
+    "coffees": [
+        {
+            "name": "The White bag",
+            "dose": 16.3,
+            "grind_size": 7,
+            "extraction": 40.0
+        },
+        {
+            "name": "Brown bag",
+            "dose": 1.0,
+            "grind_size": 1,
+            "extraction": 20.0
+        }
+    ]
+}

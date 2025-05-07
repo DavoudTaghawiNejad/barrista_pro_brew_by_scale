@@ -16,4 +16,4 @@ class Storage():
     def set(self, key, value):
         self._storage[key] = value
         with open(self.filename, 'w') as f:
-            ujson.dump(self._storage, f)
+            ujson.dump(self._storage, f, indent=4)  # Add indentation for pretty-printing
