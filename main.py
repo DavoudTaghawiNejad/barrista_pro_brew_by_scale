@@ -1,21 +1,6 @@
 from microdot import Microdot, Response
-try:
-    import ujson
-    import uasyncio as asyncio
-    from scale import read_load_cell, update_data
-    from network_tools import connect_wifi
-    from coffee_machine import CoffeeMachine
-    PORT = 80
-    HOST = '0.0.0.0'
-except ImportError:
-    from fake_coffee_machine import CoffeeMachine
-    connect_wifi = lambda : None
-    import json as ujson
-    import asyncio
-    PORT = 5008
-    HOST = 'localhost'
-print("Imports successful")  # Debug print after imports
-
+from network_tools import connect_wifi
+from fake_coffee_machine import CoffeeMachine
 from storage import Storage
 from coffee_storage import CoffeeStorage
 
@@ -114,15 +99,5 @@ async def get_last_brewed(request):
     return {'last_brewed': last_brewed}, 200, {'Content-Type': 'application/json'}
 
 
-async def main():
-    try:
-        connect_wifi()
-        print(f'http://{HOST}:{PORT}')
-        await app.start_server(HOST, port=PORT)
-        print('andhere')
-    except Exception as e:
-        print(f"Error starting server: {e}")
-        import sys
-        sys.exit(1)
-
-asyncio.run(main())
+connect_wifi('ANDREIA-2G', '12341234')
+app.run(debug=True)
