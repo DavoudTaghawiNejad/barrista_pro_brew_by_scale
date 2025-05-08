@@ -1,5 +1,5 @@
-import uasyncio as asyncio
-import utime as time
+import json
+import time
 from switch_servo import SwitchServo
 from scale import Scale
 
@@ -15,13 +15,19 @@ class CoffeeMachine:
         self.scale.zero_and_start()
         self.servo.press()
         self.servo.set_ready()
+        time = 0
         while True:
             extraction_weight = self.scale.read_weight()
+
+            if time % 10 == 0:
+                self.weight_graph.append(extraction_weight)
+
             if extraction_weight >= extraction:
                 self.servo.press()
                 self.servo.set_not_ready()
                 break
             await asyncio.sleep(10 / 1000)
+            time += 1
 
     def programm_preinfusion(self, preinfusion_time=20):
         self.servo.press()
@@ -32,4 +38,6 @@ class CoffeeMachine:
         self.config.set(preinfusion_time)
 
     def get_chart_json(self):
-        self.scale.get_chart_json()
+        data = self.weight_graph.copy()
+        self.weight_graph = []
+        return json.dumps(data)

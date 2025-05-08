@@ -16,17 +16,19 @@ class CoffeeMachine:
         print('servo.press')
         print('servo.ready')
         extraction_weight = 0
+        time = 0
         while True:
             extraction_weight += random() / 60 * 5
 
-            self.weight_graph.append(extraction_weight)
-            print(extraction_weight)
+            if time % 10 == 0:
+                self.weight_graph.append(extraction_weight)
 
             if extraction_weight >= extraction:
                 print('servo.press')
                 print('servo.not_ready')
                 break
             await asyncio.sleep(10 / 1000)
+            time += 1
 
     def programm_preinfusion(self, preinfusion=20):
         print('servo.press')
@@ -37,4 +39,6 @@ class CoffeeMachine:
         self.config.set(preinfusion)
 
     def get_chart_json(self):
-        return json.dumps(self.weight_graph)
+        data = self.weight_graph.copy()
+        self.weight_graph = []
+        return json.dumps(data)
