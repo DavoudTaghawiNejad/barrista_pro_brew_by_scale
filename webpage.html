@@ -160,15 +160,15 @@ async function updateValues() {
 }
 
 async function loadCoffees() {
-    const response = await fetch('/get_coffees');
+    const response = await fetch('/get_coffee_names');
     if (response.ok) {
         const data = await response.json();
         const select = document.getElementById('coffeeSelect');
         select.innerHTML = '<option value="">Select Coffee</option>';
-        data.coffees.forEach(coffee => {
+        data.names.forEach(name => {
             const option = document.createElement('option');
-            option.value = coffee.name;
-            option.text = coffee.name;
+            option.value = name;
+            option.text = name;
             select.appendChild(option);
         });
     } else {
@@ -179,11 +179,14 @@ async function loadCoffees() {
 
 async function addNewCoffee() {
     const name = prompt('Enter name for new coffee:');
-    if (name) {
+    const dose = document.getElementById('dose').value;  // Add this line
+    const grind_size = document.getElementById('grind_size').value;  // Add this line
+    const extraction = document.getElementById('extraction').value;  // Add this line
+    if (name && dose !== '' && grind_size !== '' && extraction !== '') {  // Check for all values
         const response = await fetch('/add_coffee', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: name })
+            body: JSON.stringify({ name: name, dose: dose, grind_size: grind_size, extraction: extraction })
         });
         if (response.ok) {
             snackbar.labelText = 'New coffee added!';
@@ -193,6 +196,9 @@ async function addNewCoffee() {
             snackbar.labelText = 'Failed to add coffee.';
             snackbar.open();
         }
+    } else {
+        snackbar.labelText = 'Please provide name, dose, grind_size, and extraction.';
+        snackbar.open();
     }
 }
 
@@ -244,25 +250,30 @@ window.onload = function () {
         }
         fetchLastBrewed();  // Call the function after loadCoffees, thanks to .then
     });
-    document.getElementById('coffeeSelect').addEventListener('change', async function() {
-        const selectedCoffeeName = this.value;
-        if (selectedCoffeeName) {
-            const response = await fetch('/get_coffees');
-            if (response.ok) {
-                const data = await response.json();
-                const selectedCoffee = data.coffees.find(coffee => coffee.name === selectedCoffeeName);
-                if (selectedCoffee) {
-                    document.getElementById('dose').value = selectedCoffee.dose;
-                    document.getElementById('grind_size').value = selectedCoffee.grind_size;
-                    document.getElementById('extraction').value = selectedCoffee.extraction;
-                }
+document.getElementById('coffeeSelect').addEventListener('change', async function() {
+    const selectedCoffeeName = this.value;
+    if (selectedCoffeeName) {
+        const response = await fetch('/get_coffee?name=' + selectedCoffeeName);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.coffee) {  // Assuming the response is { 'coffee': { ... } }
+                document.getElementById('dose').value = data.coffee.dose || '';
+                document.getElementById('grind_size').value = data.coffee.grind_size || '';
+                document.getElementById('extraction').value = data.coffee.extraction || '';
+            } else {
+                snackbar.labelText = 'Coffee details not found.';
+                snackbar.open();
             }
         } else {
-            document.getElementById('dose').value = '';
-            document.getElementById('grind_size').value = '';
-            document.getElementById('extraction').value = '';
+            snackbar.labelText = 'Failed to load coffee details.';
+            snackbar.open();
         }
-    });
+    } else {
+        document.getElementById('dose').value = '';
+        document.getElementById('grind_size').value = '';
+        document.getElementById('extraction').value = '';
+    }
+});
     loadCoffees().then(() => {
         if (document.getElementById('coffeeSelect').options.length > 1) {
             document.getElementById('coffeeSelect').value = document.getElementById('coffeeSelect').options[document.getElementById('coffeeSelect').options.length - 1].value;

@@ -59,20 +59,20 @@ async def make_coffee(request):
         return {'status': 'error', 'message': 'Invalid data'}, 400
 
 # Update routes to use coffee_storage
-@app.route('/get_coffees', methods=['GET'])
-async def get_coffees(request):
-    coffees = coffee_storage.get_coffees()
-    return {'coffees': coffees}, 200, {'Content-Type': 'application/json'}
 
 @app.route('/add_coffee', methods=['POST'])
 async def add_coffee(request):
     try:
         data = request.json
         name = data.get('name')
-        if not name:
-            return {'status': 'error', 'message': 'Name is required'}, 400
-        coffee_storage.add_coffee(name)
-        return {'status': 'success'}, 200
+        dose = data.get('dose')
+        grind_size = data.get('grind_size')
+        extraction = data.get('extraction')
+        if name and dose is not None and grind_size is not None and extraction is not None:
+            coffee_storage.add_coffee(name, dose, grind_size, extraction)
+            return {'status': 'success'}, 200
+        else:
+            return {'status': 'error', 'message': 'Missing required parameters'}, 400
     except Exception as e:
         return {'status': 'error', 'message': str(e)}, 400
 
@@ -84,14 +84,13 @@ async def update_coffee(request):
         dose = data.get('dose')
         grind_size = data.get('grind_size')
         extraction = data.get('extraction')
-        if not name:
-            return {'status': 'error', 'message': 'Name is required'}, 400
         success = coffee_storage.update_coffee(name, dose, grind_size, extraction)
         if success:
             return {'status': 'success'}, 200
         else:
             return {'status': 'error', 'message': 'Coffee not found'}, 404
     except Exception as e:
+        print(e)
         return {'status': 'error', 'message': str(e)}, 400
 
 @app.route('/get_last_brewed')
@@ -102,6 +101,23 @@ async def get_last_brewed(request):
     print(last_brewed)
     return {'last_brewed': last_brewed}, 200, {'Content-Type': 'application/json'}
 
+
+@app.route('/get_coffee_names', methods=['GET'])
+async def get_coffee_names(request):
+    coffees = coffee_storage.get_coffee_names()
+    print(f'{coffees=}')
+    return {'names': coffees}, 200, {'Content-Type': 'application/json'}
+
+@app.route('/get_coffee', methods=['GET'])
+async def get_coffee(request):
+    name = request.args.get('name')
+    if name:
+        coffee = coffee_storage.get_coffee(name)
+        print(f'{coffee=}')
+
+        return {'coffee': coffee}, 200, {'Content-Type': 'application/json'}
+    else:
+        return {'status': 'error', 'message': 'Name parameter is required'}, 400
 
 connect_wifi('ANDREIA-2G', '12341234')
 app.run(debug=True)
