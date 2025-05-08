@@ -1,3 +1,8 @@
 {"measurment_frequency": 0.05,
  "extraction": 40,
- "preinfusion": 20}
+ "preinfusion": 20,
+ "ready_angle": 5,
+ "pressed_angle": 0,
+ "not_ready_angle": 90,
+ "servo_pin": 13,
+ "scale_factor": 1}

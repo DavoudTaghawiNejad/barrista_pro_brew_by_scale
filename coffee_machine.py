@@ -7,9 +7,9 @@ class CoffeeMachine:
     def __init__(self, config):
         self.config = config
         self.measurment_frequency = config.get('measurment_frequency')
-        self.servo = SwitchServo()
+        self.servo = SwitchServo(config)
         self.servo.set_not_ready()
-        self.scale = Scale()
+        self.scale = Scale(config)
 
     async def make_coffee(self, extraction):
         self.scale.zero_and_start()
