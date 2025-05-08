@@ -55,7 +55,8 @@ async def make_coffee(request):
             last_time_storage.set('last_brewed', coffee_name)
 
         return {'status': 'success'}, 200
-    except (KeyError, ValueError):
+    except (KeyError, ValueError) as e:
+        print(e)
         return {'status': 'error', 'message': 'Invalid data'}, 400
 
 # Update routes to use coffee_storage
