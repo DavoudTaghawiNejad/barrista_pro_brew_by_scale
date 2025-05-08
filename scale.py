@@ -17,8 +17,4 @@ class Scale:
 
     def read_weight(self):
         reading = (self.hx.read() - self.zero) / self.scale_factor
-        self.weight_graph.append(reading)  # Add newest
         return reading
-
-    def get_chart_json(self):
-        return json.dumps(self.weight_graph)
