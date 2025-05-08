@@ -32,4 +32,4 @@ class CoffeeMachine:
         self.config.set(preinfusion_time)
 
     def get_chart_json(self):
-        self.scale.get_chart_json(self)
+        self.scale.get_chart_json()
