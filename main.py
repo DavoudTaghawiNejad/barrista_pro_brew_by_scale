@@ -5,8 +5,13 @@ from storage import Storage
 from coffee_storage import CoffeeStorage
 
 
-with open('webpage.html', 'r') as f:
-    HTML = f.read()
+def load_html_generatory(substitutions={}):
+        with open('webpage.html') as f:
+            for line in f:
+                for place_holder, content in substitutions.items():
+                    line = line.replace(place_holder, content)
+                yield line
+
 
 app = Microdot()
 
@@ -18,10 +23,9 @@ last_time_storage = Storage(filename='last_time.json')
 
 @app.route('/')
 async def index(request):
-    chart_data = coffee_machine.get_chart_json()
     extraction = str(config.get('extraction'))
-    html = HTML.replace('{{chart_data}}', str(chart_data))
-    html = html.replace('{{extraction}}', str(int(float(extraction))))
+    html = load_html_generatory(substitutions={
+        '{{extraction}}': str(int(float(extraction)))})
     return Response(html, headers={'Content-Type': 'text/html'})
 
 @app.route('/get_chart_data')
