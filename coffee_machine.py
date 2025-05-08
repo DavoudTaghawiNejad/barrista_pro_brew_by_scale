@@ -1,4 +1,5 @@
 import json
+import asyncio
 import time
 from switch_servo import SwitchServo
 from scale import Scale
@@ -13,8 +14,8 @@ class CoffeeMachine:
 
     async def make_coffee(self, extraction):
         self.scale.zero_and_start()
-        self.servo.press()
-        self.servo.set_ready()
+        self.servo.click(self.servo.set_ready)
+        self.weight_graph = []
         time = 0
         while True:
             extraction_weight = self.scale.read_weight()
@@ -23,8 +24,7 @@ class CoffeeMachine:
                 self.weight_graph.append(extraction_weight)
 
             if extraction_weight >= extraction:
-                self.servo.press()
-                self.servo.set_not_ready()
+                self.servo.click(self.servo.set_not_ready)
                 break
             await asyncio.sleep(10 / 1000)
             time += 1
