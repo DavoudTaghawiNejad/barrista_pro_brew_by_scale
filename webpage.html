@@ -117,15 +117,16 @@ let isMakingCoffee = false;
 let pollInterval;
 let snackbar;
 const colors = ['red', 'green', 'blue', 'yellow', 'magenta', 'cyan', 'orange', 'purple', 'lime', 'navy', 'pink', 'brown'];
-let colorIndex = 0;  // For cycling colors
+let colorIndex = -1;  // For cycling colors
+let coffee_number = 0;
 
-//async function loadData() {
-//    // Charting code removed as per task
-//    snackbar.labelText = 'Charting has been removed.';
-//    snackbar.open();
-//}
-
-// Add a function for random color, but we'll use the defined array
+const chart = new Chartist.Line('#chart-container', {
+        labels: [],
+        series: [[]]
+    }, {
+        axisX: { type: Chartist.FixedScaleAxis, ticks: [0, 60], high: 60, low: 0 },
+        axisY: { type: Chartist.FixedScaleAxis, ticks: [0, 60], high: 60, low: 0 }
+    });
 
 async function makeCoffee() {
     if (isMakingCoffee) {
@@ -136,18 +137,13 @@ async function makeCoffee() {
         snackbar.labelText = 'Making Coffee.';
         snackbar.open();
     }
+    isMakingCoffee = true;
+    coffee_number += 1
     const selectedCoffee = document.getElementById('coffeeSelect').value;
     const extraction = document.getElementById('extraction').value;
-    isMakingCoffee = true;
+
 
     colorIndex = (colorIndex + 1) % colors.length;  // Cycle color index
-    const chart = new Chartist.Line('#chart-container', {
-        labels: [],
-        series: [[{ meta: selectedCoffee + ' ' + (colorIndex + 1), value: [] }]]
-    }, {
-        axisX: { type: Chartist.FixedScaleAxis, ticks: [0, 60], high: 60, low: 0 },
-        axisY: { type: Chartist.FixedScaleAxis, ticks: [0, 60], high: 60, low: 0 }
-    });
     try {
         const response = await fetch('/make_coffee', {
             method: 'POST',
@@ -190,12 +186,12 @@ async function makeCoffee() {
                     snackbar.labelText = 'Coffee made successfully.';
                     snackbar.open();
                 } else if (responseData.data && responseData.data.length > 0) {
-                    if (!chart.data.series[0].value) {
-                        chart.data.series[0].value = [];
+                    if (chart.data.series.length < coffee_number + 1) {
+                        chart.data.series.push([{ meta: selectedCoffee + ' ' + (coffee_number), value: [] }]);
                     }
-                    chart.data.series[0].value = [...chart.data.series[0].value, ...responseData.data];
-                    console.log(chart.data.series[0].value)
-                    console.log(chart.data.series)
+                    if (!chart.data.series[coffee_number].value) {
+                        chart.data.series[coffee_number].value = [];}
+                    chart.data.series[coffee_number].value = [...chart.data.series[coffee_number].value, ...responseData.data];
                     chart.update();
                     console.log('Chart updated with data');
                     const maxX = Math.max(...responseData.data.map(pair => pair[0] || 0), 60);
