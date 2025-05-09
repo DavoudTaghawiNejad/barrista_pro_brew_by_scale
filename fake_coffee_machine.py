@@ -22,7 +22,7 @@ class CoffeeMachine:
         time = 0
         while True:
             if time > 100:
-                extraction_weight += (0.7 * random() / 60 * 5 + 0.3 * extraction_weight)
+                extraction_weight += (0.7 * random() + 0.3 * extraction_weight) / 60 * 5
 
             if time % 10 == 0:
                 self.weight_graph.append(extraction_weight)
