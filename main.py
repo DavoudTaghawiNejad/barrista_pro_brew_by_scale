@@ -44,6 +44,8 @@ async def update(request):
 
 @app.route('/make_coffee', methods=['POST'])
 async def make_coffee(request):
+    if coffee_machine.is_brewing:  # Assuming is_brewing is a method or attribute to check status
+        return {'status': 'error', 'message': 'Coffee is already being made'}, 400
     try:
         data = request.json
         extraction = round(float(data['extraction']), 1)

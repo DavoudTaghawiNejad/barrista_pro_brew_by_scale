@@ -11,8 +11,10 @@ class CoffeeMachine:
         self.servo = SwitchServo(config)
         self.servo.set_not_ready()
         self.scale = Scale(config)
+        self.is_brewing = False
 
     async def make_coffee(self, extraction):
+        self.is_brewing = True
         self.scale.zero_and_start()
         self.servo.click(self.servo.set_ready)
         self.weight_graph = []
@@ -28,6 +30,7 @@ class CoffeeMachine:
                 break
             await asyncio.sleep(10 / 1000)
             time += 1
+        self.is_brewing = False
 
     def programm_preinfusion(self, preinfusion_time=20):
         self.servo.press()

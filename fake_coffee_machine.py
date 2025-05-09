@@ -9,8 +9,14 @@ class CoffeeMachine:
         self.config = config
         self.measurment_frequency = config.get('measurment_frequency')
         self.weight_graph = []
+        self.servo = SwitchServo(config)
+        self.servo.set_not_ready()
+        self.is_brewing = False
 
     async def make_coffee(self, extraction):
+        self.is_brewing = True
+        self.servo.click(self.servo.set_ready)
+        extraction_weight = 0
         self.weight_graph = []
         print('scale.zero_and_start')
         print('servo.press')
@@ -18,7 +24,8 @@ class CoffeeMachine:
         extraction_weight = 0
         time = 0
         while True:
-            extraction_weight += random() / 60 * 5
+            if time > 100:
+                extraction_weight += (0.7 * random() / 60 * 5 + 0.3 * extraction_weight)
 
             if time % 10 == 0:
                 self.weight_graph.append(extraction_weight)
@@ -29,6 +36,7 @@ class CoffeeMachine:
                 break
             await asyncio.sleep(10 / 1000)
             time += 1
+        self.is_brewing = False
 
     def programm_preinfusion(self, preinfusion=20):
         print('servo.press')
