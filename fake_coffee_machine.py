@@ -9,13 +9,10 @@ class CoffeeMachine:
         self.config = config
         self.measurment_frequency = config.get('measurment_frequency')
         self.weight_graph = []
-        self.servo = SwitchServo(config)
-        self.servo.set_not_ready()
         self.is_brewing = False
 
     async def make_coffee(self, extraction):
         self.is_brewing = True
-        self.servo.click(self.servo.set_ready)
         extraction_weight = 0
         self.weight_graph = []
         print('scale.zero_and_start')
