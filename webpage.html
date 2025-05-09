@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+    <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
     <title>Barrista Uber - by Davoud Taghawi-Nejad</title>
     <link href="https://unpkg.com/material-components-web@14.0.0/dist/material-components-web.min.css" rel="stylesheet">
     <script src="https://unpkg.com/material-components-web@14.0.0/dist/material-components-web.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         .container { max-width: 800px; margin: auto; padding: 20px; }
         .controls { margin: 20px 0; }
         input { width: 100px; text-align: center; }
         canvas { max-width: 100%; }
+        #chart-container {
+            height: 600px;  /* Set to twice the assumed original height for better visibility */
+        }
         /* Hide number input spin buttons (Chrome, Safari, Edge) */
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button {
@@ -49,7 +53,7 @@
 
     <div class="container">
         <h1>Barrista Uber - by Davoud Taghawi-Nejad</h1>
-        <canvas id="lineChart" width="400" height="200"></canvas>
+        <div id="chart-container"></div>
 <div class="controls">
     <h3>Select or Create Coffee</h3>
     <label for="coffeeSelect">Coffee Profile:</label>
@@ -108,91 +112,111 @@
 </div>
     </div>
 
-    <script>
+<script>
 let isMakingCoffee = false;
-let lineChart;
 let pollInterval;
 let snackbar;
-let currentGraphIndex = -1;  // New line to track the index
-let datasets = [];  // Retain existing line
+const colors = ['red', 'green', 'blue', 'yellow', 'magenta', 'cyan', 'orange', 'purple', 'lime', 'navy', 'pink', 'brown'];
+let colorIndex = 0;  // For cycling colors
 
-async function loadData() {
-    try {
-        const response = await fetch('/get_chart_data');
-        if (!response.ok) throw new Error('Network response was not ok');
-        const chartData = await response.json();
+//async function loadData() {
+//    // Charting code removed as per task
+//    snackbar.labelText = 'Charting has been removed.';
+//    snackbar.open();
+//}
 
-        if (lineChart.data.datasets.length === 0) {
-            // Create a new dataset if none exist
-            const newDataset = {
-                label: 'New Curve 1',
-                data: chartData,
-                borderColor: getRandomColor(),
-                fill: false,
-                pointRadius: 0
-            };
-            lineChart.data.datasets.push(newDataset);
-        } else {
-            const latestDataset = lineChart.data.datasets[lineChart.data.datasets.length - 1];
-            latestDataset.data.push(...chartData);
-        }
-        lineChart.update();
-    } catch (error) {
-        console.error("Error loading data:", error);
-        snackbar.labelText = 'Failed to load data. Please try again.';
-        snackbar.open();
-    }
-}
-
-// Add a function for random color
-function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
+// Add a function for random color, but we'll use the defined array
 
 async function makeCoffee() {
     if (isMakingCoffee) {
         snackbar.labelText = 'Coffee is already being made.';
         snackbar.open();
-        return;  // Do not proceed if already making coffee
+        return;
+    } else {
+        snackbar.labelText = 'Making Coffee.';
+        snackbar.open();
     }
     const selectedCoffee = document.getElementById('coffeeSelect').value;
     const extraction = document.getElementById('extraction').value;
-    isMakingCoffee = true;  // Start making coffee
-    currentGraphIndex = lineChart.data.datasets.length;  // Update index to the new dataset's position
+    isMakingCoffee = true;
 
-    // Create a new dataset for the new curve, starting at origin
-    const newDataset = {
-        label: 'New Curve ' + (currentGraphIndex + 1),  // Unique label based on index
-        data: [0],  // Start at origin with [0]
-        borderColor: getRandomColor(),  // Unique color
-        fill: false,
-        pointRadius: 0
-    };
-    lineChart.data.datasets.push(newDataset);  // Add to chart
-    if (pollInterval) clearInterval(pollInterval);  // Clear existing interval
-    pollInterval = setInterval(loadData, 100);  // Set polling to 100ms
-    loadData();  // Force an immediate call
-    const response = await fetch('/make_coffee', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: selectedCoffee, extraction })
+    colorIndex = (colorIndex + 1) % colors.length;  // Cycle color index
+    const chart = new Chartist.Line('#chart-container', {
+        labels: [],
+        series: [[{ meta: selectedCoffee + ' ' + (colorIndex + 1), value: [] }]]
+    }, {
+        axisX: { type: Chartist.FixedScaleAxis, ticks: [0, 60], high: 60, low: 0 },
+        axisY: { type: Chartist.FixedScaleAxis, ticks: [0, 60], high: 60, low: 0 }
     });
-    if (response.ok) {
-        isMakingCoffee = false;  // Coffee making finished
-        if (pollInterval) clearInterval(pollInterval);  // Stop polling after the process
-        snackbar.labelText = 'Coffee making started!';
-        snackbar.open();
-    } else {
-        isMakingCoffee = false;  // Reset on failure
-        if (pollInterval) clearInterval(pollInterval);  // Stop polling on failure
-        snackbar.labelText = 'Coffee making failed. Please try again.';
+    try {
+        const response = await fetch('/make_coffee', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: selectedCoffee, extraction })
+        });
+        if (response.ok) {
+            isMakingCoffee = false;
+            clearInterval(pollInterval);
+            snackbar.labelText = 'Coffee made successfully.';
+            snackbar.open();
+        } else {
+            isMakingCoffee = false;
+            clearInterval(pollInterval);
+            snackbar.labelText = 'Coffee making failed.';
+            snackbar.open();
+        }
+    } catch (error) {
+        isMakingCoffee = false;
+        clearInterval(pollInterval);
+        snackbar.labelText = 'Error making coffee: ' + error.message;
         snackbar.open();
     }
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = setInterval(async () => {
+        try {
+            const chartDataResponse = await fetch('/get_chart_data').catch(error => {
+                console.error('Fetch error:', error);  // Catch fetch errors
+                throw error;  // Re-throw to handle in outer catch
+            });
+            if (chartDataResponse.ok) {
+                const responseData = await chartDataResponse.json().catch(error => {
+                    console.error('JSON parse error:', error);  // Catch JSON parsing errors
+                    throw error;
+                });
+                console.log('Fetched data:', responseData);
+                if (responseData.is_makeing_coffee === false) {
+                    clearInterval(pollInterval);
+                    isMakingCoffee = false;
+                    snackbar.labelText = 'Coffee made successfully.';
+                    snackbar.open();
+                } else if (responseData.data && responseData.data.length > 0) {
+                    if (!chart.data.series[0].value) {
+                        chart.data.series[0].value = [];
+                    }
+                    chart.data.series[0].value = [...chart.data.series[0].value, ...responseData.data];
+                    console.log(chart.data.series[0].value)
+                    console.log(chart.data.series)
+                    chart.update();
+                    console.log('Chart updated with data');
+                    const maxX = Math.max(...responseData.data.map(pair => pair[0] || 0), 60);
+                    const maxY = Math.max(...responseData.data.map(pair => pair[1] || 0), 60);
+                    if (maxX > 60 || maxY > 60) {
+                        chart.options.axisX.high = maxX;
+                        chart.options.axisY.high = maxY;
+                        chart.update();
+                    }
+                } else {
+                    console.log('No data received from API');
+                }
+            } else {
+                console.error('API request failed:', chartDataResponse.status);
+            }
+        } catch (error) {
+            console.error('Error in polling:', error);
+        }
+    }, 200);
+
+
 }
 
 async function updateValues() {
@@ -215,7 +239,7 @@ async function updateValues() {
         if (response.ok) {
             snackbar.labelText = 'Coffee updated!';
             snackbar.open();
-            loadData();
+            // Removed loadData call
         } else {
             snackbar.labelText = 'Update failed. Please try again.';
             snackbar.open();
@@ -266,12 +290,6 @@ async function addNewCoffee() {
     } else {
         snackbar.labelText = 'Please provide name, dose, grind_size, and extraction.';
         snackbar.open();
-    }
-}
-
-function startPolling() {
-    if (!pollInterval && isMakingCoffee) {
-        pollInterval = setInterval(loadData, 500);
     }
 }
 
@@ -332,41 +350,6 @@ document.getElementById('coffeeSelect').addEventListener('change', async functio
 
     // Initialize snackbar once
     snackbar = mdc.snackbar.MDCSnackbar.attachTo(document.querySelector('.mdc-snackbar'));
-
-    // Initialize chart
-    const ctx = document.getElementById('lineChart').getContext('2d');
-lineChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: Array.from({ length: 601 }, (_, i) => i * 0.1),
-        datasets: []  // Replace with empty array
-    },
-        options: {
-            animation: { duration: 0 },
-            transitions: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: {
-                    title: { display: true, text: 'Time (seconds)' },
-                    ticks: {
-callback: function (value, index) {
-    if (index % 10 === 0) {
-        return (index * 0.1);
-    }
-    return null;
-}
-                    }
-                },
-                y: {
-                    title: { display: true, text: 'Weight (grams)' },
-                    min: 0,
-                    max: 60
-                }
-            }
-        }
-    });
-
-    loadData();  // Call once on load
 };
 
         document.getElementById('decrease').addEventListener('click', function () {
@@ -404,6 +387,4 @@ callback: function (value, index) {
             let value = parseInt(input.value) || 0;
             input.value = value + 1;
         });
-    </script>
-</body>
-</html>
+</script>
