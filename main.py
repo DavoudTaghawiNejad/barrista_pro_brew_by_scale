@@ -1,8 +1,10 @@
+import asyncio
 from microdot import Microdot, Response
 from network_tools import connect_wifi
 from fake_coffee_machine import CoffeeMachine
 from storage import Storage
 from coffee_storage import CoffeeStorage
+import json
 
 
 def load_html_generatory(substitutions={}):
@@ -31,7 +33,7 @@ async def index(request):
 @app.route('/get_chart_data')
 async def get_chart_data(request):
     chart_data = coffee_machine.get_chart_json()
-    return chart_data, 200, {'Content-Type': 'application/json'}
+    return json.dumps(chart_data), 200, {'Content-Type': 'application/json'}
 
 @app.route('/update', methods=['POST'])
 async def update(request):
@@ -44,12 +46,13 @@ async def update(request):
 
 @app.route('/make_coffee', methods=['POST'])
 async def make_coffee(request):
-    if coffee_machine.is_brewing:  # Assuming is_brewing is a method or attribute to check status
+    if coffee_machine.is_makeing_coffee:  # Assuming is_brewing is a method or attribute to check status
         return {'status': 'error', 'message': 'Coffee is already being made'}, 400
     try:
         data = request.json
         extraction = round(float(data['extraction']), 1)
-        await coffee_machine.make_coffee(extraction)
+        coffee_machine.switch_on()
+        asyncio.create_task(coffee_machine.make_coffee(extraction))
 
         # Save the last brewed coffee
         coffee_name = data.get('name')  # Assuming the name is sent in the request
