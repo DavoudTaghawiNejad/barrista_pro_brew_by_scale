@@ -113,20 +113,87 @@ let isMakingCoffee = false;
 let lineChart;
 let pollInterval;
 let snackbar;
+let currentGraphIndex = -1;  // New line to track the index
+let datasets = [];  // Retain existing line
 
-        async function loadData() {
-            try {
-                const response = await fetch('/get_chart_data');
-                if (!response.ok) throw new Error('Network response was not ok');
-                const chartData = await response.json();
-                lineChart.data.datasets[0].data.push(...chartData);
-                lineChart.update({ duration: 0 });
-            } catch (error) {
-                console.error("Error loading data:", error);
-                snackbar.labelText = 'Failed to load data. Please try again.';
-                snackbar.open();
-            }
+async function loadData() {
+    try {
+        const response = await fetch('/get_chart_data');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const chartData = await response.json();
+
+        if (lineChart.data.datasets.length === 0) {
+            // Create a new dataset if none exist
+            const newDataset = {
+                label: 'New Curve 1',
+                data: chartData,
+                borderColor: getRandomColor(),
+                fill: false,
+                pointRadius: 0
+            };
+            lineChart.data.datasets.push(newDataset);
+        } else {
+            const latestDataset = lineChart.data.datasets[lineChart.data.datasets.length - 1];
+            latestDataset.data.push(...chartData);
         }
+        lineChart.update();
+    } catch (error) {
+        console.error("Error loading data:", error);
+        snackbar.labelText = 'Failed to load data. Please try again.';
+        snackbar.open();
+    }
+}
+
+// Add a function for random color
+function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+async function makeCoffee() {
+    if (isMakingCoffee) {
+        snackbar.labelText = 'Coffee is already being made.';
+        snackbar.open();
+        return;  // Do not proceed if already making coffee
+    }
+    const selectedCoffee = document.getElementById('coffeeSelect').value;
+    const extraction = document.getElementById('extraction').value;
+    isMakingCoffee = true;  // Start making coffee
+    currentGraphIndex = lineChart.data.datasets.length;  // Update index to the new dataset's position
+
+    // Create a new dataset for the new curve, starting at origin
+    const newDataset = {
+        label: 'New Curve ' + (currentGraphIndex + 1),  // Unique label based on index
+        data: [0],  // Start at origin with [0]
+        borderColor: getRandomColor(),  // Unique color
+        fill: false,
+        pointRadius: 0
+    };
+    lineChart.data.datasets.push(newDataset);  // Add to chart
+    if (pollInterval) clearInterval(pollInterval);  // Clear existing interval
+    pollInterval = setInterval(loadData, 100);  // Set polling to 100ms
+    loadData();  // Force an immediate call
+    const response = await fetch('/make_coffee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: selectedCoffee, extraction })
+    });
+    if (response.ok) {
+        isMakingCoffee = false;  // Coffee making finished
+        if (pollInterval) clearInterval(pollInterval);  // Stop polling after the process
+        snackbar.labelText = 'Coffee making started!';
+        snackbar.open();
+    } else {
+        isMakingCoffee = false;  // Reset on failure
+        if (pollInterval) clearInterval(pollInterval);  // Stop polling on failure
+        snackbar.labelText = 'Coffee making failed. Please try again.';
+        snackbar.open();
+    }
+}
 
 async function updateValues() {
     const selectedCoffee = document.getElementById('coffeeSelect').value;
@@ -202,28 +269,6 @@ async function addNewCoffee() {
     }
 }
 
-async function makeCoffee() {
-    const selectedCoffee = document.getElementById('coffeeSelect').value;
-    const extraction = document.getElementById('extraction').value;
-    isMakingCoffee = true;  // Start making coffee
-    startPolling();  // Only if not already polling
-    const response = await fetch('/make_coffee', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: selectedCoffee, extraction })
-    });
-    if (response.ok) {
-        isMakingCoffee = false;  // Coffee making finished
-        if (pollInterval) clearInterval(pollInterval);  // Stop polling
-        snackbar.labelText = 'Coffee making started!';
-        snackbar.open();
-    } else {
-        isMakingCoffee = false;  // Reset on failure
-        snackbar.labelText = 'Coffee making failed. Please try again.';
-        snackbar.open();
-    }
-}
-
 function startPolling() {
     if (!pollInterval && isMakingCoffee) {
         pollInterval = setInterval(loadData, 500);
@@ -290,18 +335,12 @@ document.getElementById('coffeeSelect').addEventListener('change', async functio
 
     // Initialize chart
     const ctx = document.getElementById('lineChart').getContext('2d');
-    lineChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: Array.from({ length: 601 }, (_, i) => i * 0.1),
-            datasets: [{
-                label: 'Weight (grams)',
-                data: [],
-                borderColor: 'blue',
-                fill: false,
-                pointRadius: 0
-            }]
-        },
+lineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: Array.from({ length: 601 }, (_, i) => i * 0.1),
+        datasets: []  // Replace with empty array
+    },
         options: {
             animation: { duration: 0 },
             transitions: false,
