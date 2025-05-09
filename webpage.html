@@ -133,86 +133,87 @@ async function makeCoffee() {
         snackbar.labelText = 'Coffee is already being made.';
         snackbar.open();
         return;
-    } else {
-        snackbar.labelText = 'Making Coffee.';
-        snackbar.open();
     }
+
+    snackbar.labelText = 'Making Coffee.';
+    snackbar.open();
+
     isMakingCoffee = true;
-    coffee_number += 1
+    coffee_number += 1;
     const selectedCoffee = document.getElementById('coffeeSelect').value;
     const extraction = document.getElementById('extraction').value;
+    colorIndex = (colorIndex + 1) % colors.length;
 
-
-    colorIndex = (colorIndex + 1) % colors.length;  // Cycle color index
     try {
         const response = await fetch('/make_coffee', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: selectedCoffee, extraction })
         });
-        if (response.ok) {
-            isMakingCoffee = false;
-            clearInterval(pollInterval);
-            snackbar.labelText = 'Coffee made successfully.';
-            snackbar.open();
-        } else {
-            isMakingCoffee = false;
-            clearInterval(pollInterval);
+
+        if (!response.ok) {
             snackbar.labelText = 'Coffee making failed.';
             snackbar.open();
+            isMakingCoffee = false;
+            return;
         }
     } catch (error) {
         isMakingCoffee = false;
-        clearInterval(pollInterval);
-        snackbar.labelText = 'Error making coffee: ' + error.message;
+        snackbar.labelText = 'Error starting coffee: ' + error.message;
         snackbar.open();
     }
-    if (pollInterval) clearInterval(pollInterval);
+
+    // Start polling after coffee request succeeded
     pollInterval = setInterval(async () => {
         try {
-            const chartDataResponse = await fetch('/get_chart_data').catch(error => {
-                console.error('Fetch error:', error);  // Catch fetch errors
-                throw error;  // Re-throw to handle in outer catch
-            });
+            const chartDataResponse = await fetch('/get_chart_data');
             if (chartDataResponse.ok) {
-                const responseData = await chartDataResponse.json().catch(error => {
-                    console.error('JSON parse error:', error);  // Catch JSON parsing errors
-                    throw error;
-                });
+                const responseData = await chartDataResponse.json();
                 console.log('Fetched data:', responseData);
+
                 if (responseData.is_makeing_coffee === false) {
                     clearInterval(pollInterval);
                     isMakingCoffee = false;
                     snackbar.labelText = 'Coffee made successfully.';
                     snackbar.open();
-                } else if (responseData.data && responseData.data.length > 0) {
+                }
+
+                if (responseData.data && responseData.data.length > 0) {
                     if (chart.data.series.length < coffee_number + 1) {
-                        chart.data.series.push([{ meta: selectedCoffee + ' ' + (coffee_number), value: [] }]);
+                        chart.data.series.push([{ meta: selectedCoffee + ' ' + coffee_number, value: [] }]);
                     }
+
                     if (!chart.data.series[coffee_number].value) {
-                        chart.data.series[coffee_number].value = [];}
-                    chart.data.series[coffee_number].value = [...chart.data.series[coffee_number].value, ...responseData.data];
+                        chart.data.series[coffee_number].value = [];
+                    }
+
+                    chart.data.series[coffee_number].value = [
+                        ...chart.data.series[coffee_number].value,
+                        ...responseData.data
+                    ];
                     chart.update();
-                    console.log('Chart updated with data');
+
                     const maxX = Math.max(...responseData.data.map(pair => pair[0] || 0), 60);
                     const maxY = Math.max(...responseData.data.map(pair => pair[1] || 0), 60);
+
                     if (maxX > 60 || maxY > 60) {
                         chart.options.axisX.high = maxX;
                         chart.options.axisY.high = maxY;
                         chart.update();
                     }
-                } else {
-                    console.log('No data received from API');
                 }
-            } else {
-                console.error('API request failed:', chartDataResponse.status);
             }
         } catch (error) {
-            console.error('Error in polling:', error);
+            console.error('Polling error:', error);
+            clearInterval(pollInterval);
+            isMakingCoffee = false;
+            snackbar.labelText = 'Polling error: ' + error.message;
+            snackbar.open();
         }
     }, 400);
 
 }
+
 
 async function updateValues() {
     const selectedCoffee = document.getElementById('coffeeSelect').value;
