@@ -25,6 +25,12 @@
         input[type=number] {
         -moz-appearance: textfield;
         }
+        #legend {
+            font-size: 14px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
     </style>
     <style>
         .mdc-floating-label {
@@ -116,23 +122,95 @@
 let isMakingCoffee = false;
 let pollInterval;
 let snackbar;
-const colors = ['red', 'green', 'blue', 'yellow', 'magenta', 'cyan', 'orange', 'purple', 'lime', 'navy', 'pink', 'brown'];
-let colorIndex = -1;  // For cycling colors
+const colors = ['blue', 'red', 'green', 'purple', 'magenta', 'cyan', 'orange', 'yellow', 'lime', 'navy', 'pink', 'brown'];
 let coffee_number = 0;
 
 const chart = new Chartist.Line('#chart-container', {
         labels: [],
-        series: [[]]
+        series: []
     }, {
-        axisX: { type: Chartist.FixedScaleAxis, ticks: [0, 60], high: 60, low: 0 },
-        axisY: { type: Chartist.FixedScaleAxis, ticks: [0, 60], high: 60, low: 0 }
+        axisX: {
+            type: Chartist.FixedScaleAxis,
+            ticks: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60],  // Ticks every 5 seconds
+            high: 60,
+            low: 0,
+            labelInterpolationFnc: function(value) { return value + ' s'; },
+            showPoint: false  // Explicitly ensure no point markers
+        },
+        axisY: {
+            type: Chartist.FixedScaleAxis,
+            ticks: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60],  // Ticks every 5 grams
+            high: 60,
+            low: 0,
+            labelInterpolationFnc: function(value) { return value + ' g'; },
+            showPoint: false  // Explicitly ensure no point markers
+        },
+        line: {
+            width: 1.12  // Further reduced by 30% from 1.6
+        }
     });
+
+    // Add simple axis labels manually with improved styling
+    const chartContainer = document.getElementById('chart-container');
+    const xLabel = document.createElement('div');
+    xLabel.style.position = 'absolute';
+    xLabel.style.bottom = '5px';  // Adjusted for better visibility
+    xLabel.style.left = '50%';
+    xLabel.style.transform = 'translateX(-50%)';
+    xLabel.style.fontSize = '14px';
+    xLabel.style.color = 'black';  // Ensure visibility
+    xLabel.textContent = 'Seconds';
+    chartContainer.appendChild(xLabel);
+
+    const yLabel = document.createElement('div');
+    yLabel.style.position = 'absolute';
+    yLabel.style.top = '50%';
+    yLabel.style.left = '5px';  // Adjusted for better visibility
+    yLabel.style.transform = 'rotate(-90deg) translateX(-50%) translateY(-50%)';
+    yLabel.style.fontSize = '14px';
+    yLabel.style.color = 'black';  // Ensure visibility
+    yLabel.textContent = 'Extraction (grams)';
+    chartContainer.appendChild(yLabel);
+
+    // Additional CSS to hide any potential point markers
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .ct-point { display: none !important; }  // Force hide points if they persist
+    `;
+    document.head.appendChild(style);
+
+// Add simple legend after chart initialization
+const legendContainer = document.createElement('div');
+legendContainer.id = 'legend';
+legendContainer.style.position = 'relative';  // Ensure positioning
+legendContainer.style.textAlign = 'center';
+legendContainer.style.marginTop = '20px';  // Position under the graph
+document.getElementById('chart-container').insertAdjacentElement('afterend', legendContainer);  // Adjusted insertion to place after chart container
+
+// Function to update legend (call after chart update)
+function updateLegend() {
+    const series = chart.data.series;
+    const legend = document.getElementById('legend');
+    legend.innerHTML = '';  // Clear existing
+series.forEach((s, index) => {
+    if (s.meta) {  // Skip series without meta
+        const legendItem = document.createElement('span');
+        legendItem.style.display = 'inline-block';
+        legendItem.style.margin = '0 10px';
+        legendItem.innerHTML = `<span style="color: ${colors[index % colors.length]};">&#9632;</span> ${s.meta}`;
+        legend.appendChild(legendItem);
+    }
+});
+}
+
+// Call updateLegend after updating chart data
+// This assumes the original code's polling function; hook into it if possible
 
 async function makeCoffee() {
     if (isMakingCoffee) {
         snackbar.labelText = 'Coffee is already being made.';
         snackbar.open();
-        return;
+         return;
     }
 
     snackbar.labelText = 'Making Coffee.';
@@ -142,7 +220,6 @@ async function makeCoffee() {
     coffee_number += 1;
     const selectedCoffee = document.getElementById('coffeeSelect').value;
     const extraction = document.getElementById('extraction').value;
-    colorIndex = (colorIndex + 1) % colors.length;
 
     try {
         const response = await fetch('/make_coffee', {
@@ -169,7 +246,6 @@ async function makeCoffee() {
             const chartDataResponse = await fetch('/get_chart_data');
             if (chartDataResponse.ok) {
                 const responseData = await chartDataResponse.json();
-                console.log('Fetched data:', responseData);
 
                 if (responseData.is_makeing_coffee === false) {
                     clearInterval(pollInterval);
@@ -179,9 +255,9 @@ async function makeCoffee() {
                 }
 
                 if (responseData.data && responseData.data.length > 0) {
-                    if (chart.data.series.length < coffee_number + 1) {
-                        chart.data.series.push([{ meta: selectedCoffee + ' ' + coffee_number, value: [] }]);
-                    }
+if (chart.data.series.length < coffee_number + 1) {
+    chart.data.series.push({ meta: selectedCoffee + ' ' + coffee_number, value: [] });
+}
 
                     if (!chart.data.series[coffee_number].value) {
                         chart.data.series[coffee_number].value = [];
@@ -191,20 +267,21 @@ async function makeCoffee() {
                         ...chart.data.series[coffee_number].value,
                         ...responseData.data
                     ];
+                chart.update();
+                updateLegend();  // Call to update legend after chart data changes
+
+                const maxX = Math.max(...responseData.data.map(pair => pair[0] || 0), 60);
+                const maxY = Math.max(...responseData.data.map(pair => pair[1] || 0), 60);
+
+                if (maxX > 60 || maxY > 60) {
+                    chart.options.axisX.high = maxX;
+                    chart.options.axisY.high = maxY;
                     chart.update();
-
-                    const maxX = Math.max(...responseData.data.map(pair => pair[0] || 0), 60);
-                    const maxY = Math.max(...responseData.data.map(pair => pair[1] || 0), 60);
-
-                    if (maxX > 60 || maxY > 60) {
-                        chart.options.axisX.high = maxX;
-                        chart.options.axisY.high = maxY;
-                        chart.update();
-                    }
+                    updateLegend();  // Call again if chart options change
+                }
                 }
             }
         } catch (error) {
-            console.error('Polling error:', error);
             clearInterval(pollInterval);
             isMakingCoffee = false;
             snackbar.labelText = 'Polling error: ' + error.message;
@@ -291,7 +368,6 @@ async function addNewCoffee() {
 
 window.onload = function () {
     loadCoffees().then(() => {
-        // Fetch and set last brewed coffee after coffees are loaded
         async function fetchLastBrewed() {
             try {
                 const response = await fetch('/get_last_brewed');
