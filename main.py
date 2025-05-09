@@ -7,13 +7,10 @@ from coffee_storage import CoffeeStorage
 import json
 
 
-def load_html_generatory(substitutions={}):
+def load_html_generatory():
         with open('webpage.html') as f:
             for line in f:
-                for place_holder, content in substitutions.items():
-                    line = line.replace(place_holder, content)
                 yield line
-
 
 app = Microdot()
 
@@ -25,9 +22,7 @@ last_time_storage = Storage(filename='last_time.json')
 
 @app.route('/')
 async def index(request):
-    extraction = str(config.get('extraction'))
-    html = load_html_generatory(substitutions={
-        '{{extraction}}': str(int(float(extraction)))})
+    html = load_html_generatory()
     return Response(html, headers={'Content-Type': 'text/html'})
 
 @app.route('/get_chart_data')
