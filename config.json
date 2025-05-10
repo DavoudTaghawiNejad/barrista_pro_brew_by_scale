@@ -4,6 +4,6 @@
  "ready_angle": 30,
  "pressed_angle": 5,
  "not_ready_angle": 125,
- "servo_pin": 15,
+ "servo_pin": 23,
  "scale_factor": 1,
  "click_length": 350}
