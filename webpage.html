@@ -395,15 +395,18 @@ async function addNewCoffee() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: name, dose: dose, grind_size: grind_size, extraction: extraction })
         });
-        if (response.ok) {
-            snackbar.labelText = 'New coffee added!';
-            snackbar.open();
-            loadCoffees().then(() => {
-                if (document.getElementById('coffeeSelect').options.length > 0) {
-                    document.getElementById('coffeeSelect').value = document.getElementById('coffeeSelect').options[document.getElementById('coffeeSelect').options.length - 1].value;
-                    document.getElementById('coffeeSelect').dispatchEvent(new Event('change'));
-                }
-            });
+            if (response.ok) {
+                console.log('New coffee added successfully. Response OK.');
+                snackbar.labelText = 'New coffee added!';
+                snackbar.open();
+                loadCoffees().then(() => {
+                    console.log('Coffees reloaded. Options length: ' + document.getElementById('coffeeSelect').options.length);
+                    if (document.getElementById('coffeeSelect').options.length > 0) {
+                        document.getElementById('coffeeSelect').value = name;  // Select by name
+                        console.log('Selected new coffee: ' + name);
+                        document.getElementById('coffeeSelect').dispatchEvent(new Event('change'));
+                    }
+                });
         } else {
             snackbar.labelText = 'Failed to add coffee.';
             snackbar.open();
