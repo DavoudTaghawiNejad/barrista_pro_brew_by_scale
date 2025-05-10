@@ -15,13 +15,11 @@
         #chart-container {
             height: 600px;  /* Set to twice the assumed original height for better visibility */
         }
-        /* Hide number input spin buttons (Chrome, Safari, Edge) */
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button {
         -webkit-appearance: none;
         margin: 0;
         }
-        /* Hide number input spin buttons (Firefox) */
         input[type=number] {
         -moz-appearance: textfield;
         }
@@ -101,7 +99,6 @@
     <label for="coffeeSelect">Coffee Profile:</label>
     <select id="coffeeSelect" class="mdc-select">
         <option value="">Select or Add Coffee</option>
-        <!-- Options will be populated dynamically -->
     </select>
     <!-- Removed Load Coffees button -->
     <button class="mdc-button mdc-button--outlined" onclick="addNewCoffee()">Add New Coffee</button>
@@ -238,7 +235,6 @@ function updateLegend() {
             legendItem.style.margin = '0 10px';
             const color = colors[index % colors.length];  // Use modulo for safety
             legendItem.innerHTML = `<span style="color: ${color}; font-size: 30px;">&#9632;</span> ${s.meta}`;
-            console.log(legendItem.innerHTML);
             legend.appendChild(legendItem);
         }
     });
@@ -396,14 +392,11 @@ async function addNewCoffee() {
             body: JSON.stringify({ name: name, dose: dose, grind_size: grind_size, extraction: extraction })
         });
             if (response.ok) {
-                console.log('New coffee added successfully. Response OK.');
                 snackbar.labelText = 'New coffee added!';
                 snackbar.open();
                 loadCoffees().then(() => {
-                    console.log('Coffees reloaded. Options length: ' + document.getElementById('coffeeSelect').options.length);
-                    if (document.getElementById('coffeeSelect').options.length > 0) {
+                        if (document.getElementById('coffeeSelect').options.length > 0) {
                         document.getElementById('coffeeSelect').value = name;  // Select by name
-                        console.log('Selected new coffee: ' + name);
                         document.getElementById('coffeeSelect').dispatchEvent(new Event('change'));
                     }
                 });
@@ -431,7 +424,6 @@ window.onload = function () {
                     }
                 }
             } catch (error) {
-                console.error("Error fetching last brewed coffee:", error);
             }
         }
         fetchLastBrewed();  // Call the function after loadCoffees, thanks to .then
