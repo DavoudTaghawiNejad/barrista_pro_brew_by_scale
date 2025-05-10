@@ -25,7 +25,7 @@ class SwitchServo:
     def click(self, return_movement=None):
         old_angle = self.current_angle
         self._move_to_angle(self.pressed)
-        time.sleep(self.config.get('click_length'))
+        time.sleep_ms(self.config.get('click_length'))
         if return_movement is None:
             self._move_to_angle(old_angle)
         else:
