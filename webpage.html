@@ -76,6 +76,22 @@
             display: flex;  /* Use flex to align contents */
             align-items: center;  /* Center vertically if needed */
         }
+        .mobile-container {
+            width: 100%;
+            max-width: 12cm;
+            margin: auto;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 10px;  /* Add some space between containers */
+        }
+        .mobile-container label {
+            text-align: left;
+            width: auto;  /* Ensure labels don't stretch */
+        }
+        .mdc-button, .mdc-text-field__input {
+            height: 40px;  /* Standardize height */
+        }
     </style>
 </head>
 <body>
@@ -95,60 +111,68 @@
         <h1>Barrista Uber - by Davoud Taghawi-Nejad</h1>
         <div id="chart-container"></div>
 <div class="controls">
-    <h3>Select or Create Coffee</h3>
-    <label for="coffeeSelect">Coffee Profile:</label>
-    <select id="coffeeSelect" class="mdc-select">
-        <option value="">Select or Add Coffee</option>
-    </select>
-    <!-- Removed Load Coffees button -->
-    <button class="mdc-button mdc-button--outlined" onclick="addNewCoffee()">Add New Coffee</button>
-    <br><br>
-    <h3>Adjust Values</h3>
-    <label>Dose (grams):</label>
-    <button class="mdc-button mdc-button--raised" id="decreaseDose">-</button>
-    <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
-        <input type="number" id="dose" class="mdc-text-field__input" step="0.1" min="0" style="width: 100px;">
-        <span class="mdc-notched-outline">
-          <span class="mdc-notched-outline__leading"></span>
-          <span class="mdc-notched-outline__notch">
-            <span class="mdc-floating-label"></span>
-          </span>
-          <span class="mdc-notched-outline__trailing"></span>
-        </span>
-      </label>
-    <button class="mdc-button mdc-button--raised" id="increaseDose">+</button>
-    <br><br>
-    <label>Grind Size:</label>
-    <button class="mdc-button mdc-button--raised" id="decreaseGrind">-</button>
-    <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
-        <input type="number" id="grind_size" class="mdc-text-field__input" step="1" min="0" style="width: 100px;">
-        <span class="mdc-notched-outline">
-          <span class="mdc-notched-outline__leading"></span>
-          <span class="mdc-notched-outline__notch">
-            <span class="mdc-floating-label"></span>
-          </span>
-          <span class="mdc-notched-outline__trailing"></span>
-        </span>
-      </label>
-    <button class="mdc-button mdc-button--raised" id="increaseGrind">+</button>
-    <br><br>
-    <label>Extraction (grams):</label>
-    <button class="mdc-button mdc-button--raised" id="decrease">-</button>
-    <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
-        <input type="number" id="extraction" class="mdc-text-field__input" min="0" min="200" style="width: 100px;" step="1">
-        <span class="mdc-notched-outline">
-          <span class="mdc-notched-outline__leading"></span>
-          <span class="mdc-notched-outline__notch">
-            <span class="mdc-floating-label"></span>
-          </span>
-          <span class="mdc-notched-outline__trailing"></span>
-        </span>
-     </label>
-
-    <button class="mdc-button mdc-button--raised" id="increase">+</button>
-    <br><br>
-    <button class="mdc-button mdc-button--outlined" onclick="updateValues()">Remember Coffee</button>
-    <button class="mdc-button mdc-button--raised" onclick="makeCoffee()">Make Coffee</button>
+    <div class="mobile-container">
+        <h3>Select or Create Coffee</h3>
+    </div>
+    <div class="mobile-container" style="flex-wrap: wrap;">
+        <label for="coffeeSelect">Coffee Profile:</label>
+        <select id="coffeeSelect" class="mdc-select">
+            <option value="">Select or Add Coffee</option>
+        </select>
+        <button class="mdc-button mdc-button--outlined" onclick="addNewCoffee()">Add New Coffee</button>
+    </div>
+    <div class="mobile-container">
+        <h3>Adjust Values</h3>
+    </div>
+    <div class="mobile-container">
+        <label>Dose (grams):</label>
+        <button class="mdc-button mdc-button--raised" id="decreaseDose">-</button>
+        <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
+            <input type="number" id="dose" class="mdc-text-field__input" step="0.1" min="0" style="width: 100px;">
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label"></span>
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+          </label>
+        <button class="mdc-button mdc-button--raised" id="increaseDose">+</button>
+    </div>
+    <div class="mobile-container">
+        <label>Grind Size:</label>
+        <button class="mdc-button mdc-button--raised" id="decreaseGrind">-</button>
+        <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
+            <input type="number" id="grind_size" class="mdc-text-field__input" step="1" min="0" style="width: 100px;">
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label"></span>
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+          </label>
+        <button class="mdc-button mdc-button--raised" id="increaseGrind">+</button>
+    </div>
+    <div class="mobile-container">
+        <label>Extraction (grams):</label>
+        <button class="mdc-button mdc-button--raised" id="decrease">-</button>
+        <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
+            <input type="number" id="extraction" class="mdc-text-field__input" min="0" min="200" style="width: 100px;" step="1">
+            <span class="mdc-notched-outline">
+              <span class="mdc-notched-outline__leading"></span>
+              <span class="mdc-notched-outline__notch">
+                <span class="mdc-floating-label"></span>
+              </span>
+              <span class="mdc-notched-outline__trailing"></span>
+            </span>
+          </label>
+        <button class="mdc-button mdc-button--raised" id="increase">+</button>
+    </div>
+    <div class="mobile-container" style="flex-wrap: wrap;">
+        <button class="mdc-button mdc-button--outlined" onclick="updateValues()">Remember Coffee</button>
+        <button class="mdc-button mdc-button--raised" onclick="makeCoffee()">Make Coffee</button>
+    </div>
 </div>
     </div>
 
