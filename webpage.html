@@ -25,13 +25,49 @@
         input[type=number] {
         -moz-appearance: textfield;
         }
-        #legend {
-            font-size: 14px;
-            border-top: 1px solid #ccc;
-            padding-top: 10px;
-            margin-top: 10px;
-        }
-    </style>
+    #legend {
+        font-size: 14px;
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+
+    :root {
+        --color-a: brown;
+        --color-b: blue;
+        --color-c: red;
+        --color-d: green;
+        --color-e: purple;
+        --color-f: magenta;
+        --color-g: cyan;
+        --color-h: orange;
+        --color-i: lime;
+        --color-j: navy;
+        --color-k: pink;
+    }
+    .ct-series-a-custom .ct-line { stroke: var(--color-a); }
+    .ct-series-a-custom span { color: var(--color-a); font-size: 30px; }
+    .ct-series-b-custom .ct-line { stroke: var(--color-b); }
+    .ct-series-b-custom span { color: var(--color-b); font-size: 30px; }
+    .ct-series-c-custom .ct-line { stroke: var(--color-c); }
+    .ct-series-c-custom span { color: var(--color-c); font-size: 30px; }
+    .ct-series-d-custom .ct-line { stroke: var(--color-d); }
+    .ct-series-d-custom span { color: var(--color-d); font-size: 30px; }
+    .ct-series-e-custom .ct-line { stroke: var(--color-e); }
+    .ct-series-e-custom span { color: var(--color-e); font-size: 30px; }
+    .ct-series-f-custom .ct-line { stroke: var(--color-f); }
+    .ct-series-f-custom span { color: var(--color-f); font-size: 30px; }
+    .ct-series-g-custom .ct-line { stroke: var(--color-g); }
+    .ct-series-g-custom span { color: var(--color-g); font-size: 30px; }
+    .ct-series-h-custom .ct-line { stroke: var(--color-h); }
+    .ct-series-h-custom span { color: var(--color-h); font-size: 30px; }
+    .ct-series-i-custom .ct-line { stroke: var(--color-i); }
+    .ct-series-i-custom span { color: var(--color-i); font-size: 30px; }
+    .ct-series-j-custom .ct-line { stroke: var(--color-j); }
+    .ct-series-j-custom span { color: var(--color-j); font-size: 30px; }
+    .ct-series-k-custom .ct-line { stroke: var(--color-k); }
+    .ct-series-k-custom span { color: var(--color-k); font-size: 30px; }
+</style>
     <style>
         .mdc-floating-label {
             text-align: left;  /* Align label to the left */
@@ -110,7 +146,8 @@
           </span>
           <span class="mdc-notched-outline__trailing"></span>
         </span>
-      </label>
+     </label>
+
     <button class="mdc-button mdc-button--raised" id="increase">+</button>
     <br><br>
     <button class="mdc-button mdc-button--outlined" onclick="updateValues()">Remember Coffee</button>
@@ -122,7 +159,6 @@
 let isMakingCoffee = false;
 let pollInterval;
 let snackbar;
-const colors = ['blue', 'red', 'green', 'purple', 'magenta', 'cyan', 'orange', 'yellow', 'lime', 'navy', 'pink', 'brown'];
 let coffee_number = 0;
 
 const chart = new Chartist.Line('#chart-container', {
@@ -192,15 +228,20 @@ function updateLegend() {
     const series = chart.data.series;
     const legend = document.getElementById('legend');
     legend.innerHTML = '';  // Clear existing
-series.forEach((s, index) => {
-    if (s.meta) {  // Skip series without meta
-        const legendItem = document.createElement('span');
-        legendItem.style.display = 'inline-block';
-        legendItem.style.margin = '0 10px';
-        legendItem.innerHTML = `<span style="color: ${colors[index % colors.length]};">&#9632;</span> ${s.meta}`;
-        legend.appendChild(legendItem);
-    }
-});
+    const uniqueSeries = [];  // Array to track unique meta values
+    const colors = ['var(--color-a)', 'var(--color-b)', 'var(--color-c)', 'var(--color-d)', 'var(--color-e)', 'var(--color-f)', 'var(--color-g)', 'var(--color-h)', 'var(--color-i)', 'var(--color-j)', 'var(--color-k)'];  // Add this line
+    series.forEach((s, index) => {
+        if (s.meta && !uniqueSeries.includes(s.meta)) {  // Skip if meta is not unique
+            uniqueSeries.push(s.meta);
+            const legendItem = document.createElement('span');
+            legendItem.style.display = 'inline-block';
+            legendItem.style.margin = '0 10px';
+            const color = colors[index % colors.length];  // Use modulo for safety
+            legendItem.innerHTML = `<span style="color: ${color}; font-size: 30px;">&#9632;</span> ${s.meta}`;
+            console.log(legendItem.innerHTML);
+            legend.appendChild(legendItem);
+        }
+    });
 }
 
 // Call updateLegend after updating chart data
@@ -240,6 +281,12 @@ async function makeCoffee() {
         snackbar.open();
     }
 
+
+    chart.data.series.push({ meta: selectedCoffee + ' ' + coffee_number, value: [], className: 'ct-series-' + String.fromCharCode(97 + coffee_number - 1) + '-custom' });
+    //chart.data.series[coffee_number - 1].value = responseData.data;
+
+
+
     // Start polling after coffee request succeeded
     pollInterval = setInterval(async () => {
         try {
@@ -255,16 +302,12 @@ async function makeCoffee() {
                 }
 
                 if (responseData.data && responseData.data.length > 0) {
-if (chart.data.series.length < coffee_number + 1) {
-    chart.data.series.push({ meta: selectedCoffee + ' ' + coffee_number, value: [] });
-}
-
-                    if (!chart.data.series[coffee_number].value) {
-                        chart.data.series[coffee_number].value = [];
+                    if (chart.data.series[coffee_number - 1] && !chart.data.series[coffee_number - 1].value) {
+                        chart.data.series[coffee_number - 1].value = [];
                     }
 
-                    chart.data.series[coffee_number].value = [
-                        ...chart.data.series[coffee_number].value,
+                    chart.data.series[coffee_number - 1].value = [
+                        ...chart.data.series[coffee_number - 1].value,
                         ...responseData.data
                     ];
                 chart.update();
