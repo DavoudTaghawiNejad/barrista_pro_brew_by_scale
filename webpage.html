@@ -398,7 +398,12 @@ async function addNewCoffee() {
         if (response.ok) {
             snackbar.labelText = 'New coffee added!';
             snackbar.open();
-            loadCoffees();  // Reload coffees
+            loadCoffees().then(() => {
+                if (document.getElementById('coffeeSelect').options.length > 0) {
+                    document.getElementById('coffeeSelect').value = document.getElementById('coffeeSelect').options[document.getElementById('coffeeSelect').options.length - 1].value;
+                    document.getElementById('coffeeSelect').dispatchEvent(new Event('change'));
+                }
+            });
         } else {
             snackbar.labelText = 'Failed to add coffee.';
             snackbar.open();

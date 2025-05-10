@@ -8,9 +8,12 @@ import json
 
 
 def load_html_generatory():
-        with open('webpage.html') as f:
-            for line in f:
-                yield line
+    with open('webpage.html') as f:
+        while True:
+            chunk = f.read(1024)
+            if not chunk:
+                break
+            yield chunk
 
 app = Microdot()
 
