@@ -1,7 +1,7 @@
 import asyncio
 from random import random
 import time
-
+from switch_servo import SwitchServo
 
 class Timer:
     def __init__(self):
@@ -17,12 +17,15 @@ class CoffeeMachine:
         self.measurment_frequency = config.get('measurment_frequency')
         self.weight_graph = []
         self.is_makeing_coffee = False
+        self.servo = SwitchServo(config)
+        self.servo.set_not_ready()
 
     def switch_on(self):
         self.is_makeing_coffee = True
 
     async def make_coffee(self, extraction):
         assert self.is_makeing_coffee
+        self.servo.click(self.servo.set_ready)
         extraction_weight = 0
         self.weight_graph = []
         print('Start coffee making')
@@ -41,8 +44,7 @@ class CoffeeMachine:
                 print(timer(), extraction_weight)
 
             if extraction_weight >= extraction:
-                print('servo.press')
-                print('servo.not_ready')
+                self.servo.click(self.servo.set_not_ready)
                 break
             await asyncio.sleep(10 / 1000)
             counter += 1
@@ -50,13 +52,13 @@ class CoffeeMachine:
         self.is_makeing_coffee = False
         print('Coffee made')
 
-    def programm_preinfusion(self, preinfusion=20):
-        print('servo.press')
-        time.sleep(preinfusion)
-        print('servo.ready')
+    def programm_preinfusion(self, preinfusion_time=20):
+        self.servo.press()
+        time.sleep(preinfusion_time)
+        self.servo.set_ready()
         time.sleep(60)
-        print('servo.set_not_ready')
-        self.config.set(preinfusion)
+        self.servo.set_not_ready()
+        self.config.set(preinfusion_time)
 
     def get_chart_json(self):
         data = self.weight_graph.copy()
