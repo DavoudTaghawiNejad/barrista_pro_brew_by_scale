@@ -207,34 +207,6 @@ const chart = new Chartist.Line('#chart-container', {
         }
     });
 
-    // Add simple axis labels manually with improved styling
-    const chartContainer = document.getElementById('chart-container');
-    const xLabel = document.createElement('div');
-    xLabel.style.position = 'absolute';
-    xLabel.style.bottom = '5px';  // Adjusted for better visibility
-    xLabel.style.left = '50%';
-    xLabel.style.transform = 'translateX(-50%)';
-    xLabel.style.fontSize = '14px';
-    xLabel.style.color = 'black';  // Ensure visibility
-    xLabel.textContent = 'Seconds';
-    chartContainer.appendChild(xLabel);
-
-    const yLabel = document.createElement('div');
-    yLabel.style.position = 'absolute';
-    yLabel.style.top = '50%';
-    yLabel.style.left = '5px';  // Adjusted for better visibility
-    yLabel.style.transform = 'rotate(-90deg) translateX(-50%) translateY(-50%)';
-    yLabel.style.fontSize = '14px';
-    yLabel.style.color = 'black';  // Ensure visibility
-    yLabel.textContent = 'Extraction (grams)';
-    chartContainer.appendChild(yLabel);
-
-    // Additional CSS to hide any potential point markers
-    const style = document.createElement('style');
-    style.innerHTML = `
-        .ct-point { display: none !important; }  // Force hide points if they persist
-    `;
-    document.head.appendChild(style);
 
 // Add simple legend after chart initialization
 const legendContainer = document.createElement('div');
