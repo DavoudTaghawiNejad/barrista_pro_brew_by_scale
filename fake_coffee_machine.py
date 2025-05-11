@@ -2,6 +2,8 @@ import asyncio
 from random import random
 import time
 from switch_servo import SwitchServo
+from display import Display
+
 
 class Timer:
     def __init__(self):
@@ -19,12 +21,15 @@ class CoffeeMachine:
         self.is_makeing_coffee = False
         self.servo = SwitchServo(config)
         self.servo.set_not_ready()
+        self.display = Display(config)
+
 
     def switch_on(self):
         self.is_makeing_coffee = True
 
     async def make_coffee(self, extraction):
         assert self.is_makeing_coffee
+        self.display_light = asyncio.create_task(self.display.pulse())
         self.servo.click(self.servo.set_ready)
         extraction_weight = 0
         self.weight_graph = []
@@ -45,6 +50,7 @@ class CoffeeMachine:
 
             if extraction_weight >= extraction:
                 self.servo.click(self.servo.set_not_ready)
+                self.display_light.cancel()
                 break
             await asyncio.sleep(10 / 1000)
             counter += 1

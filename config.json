@@ -6,4 +6,10 @@
  "not_ready_angle": 125,
  "servo_pin": 23,
  "scale_factor": 1,
- "click_length": 350}
+ "click_length": 350,
+ "display":{
+    "spi": 1,
+    "cs": 2,
+    "dc": 15,
+    "rst":16,
+    "bl": 12}}
