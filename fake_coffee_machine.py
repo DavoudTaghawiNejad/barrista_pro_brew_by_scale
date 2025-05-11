@@ -14,7 +14,7 @@ class Timer:
 
 
 class CoffeeMachine:
-    def __init__(self, config):
+    def __init__(self, config, coffee_name, coffee_data):
         self.config = config
         self.measurment_frequency = config.get('measurment_frequency')
         self.weight_graph = []
@@ -22,6 +22,7 @@ class CoffeeMachine:
         self.servo = SwitchServo(config)
         self.servo.set_not_ready()
         self.display = Display(config)
+        self.display.show_coffee(coffee_name, **coffee_data)
 
 
     def switch_on(self):

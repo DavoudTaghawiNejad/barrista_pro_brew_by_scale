@@ -19,9 +19,10 @@ app = Microdot()
 
 config = Storage(filename='config.json')
 coffee_storage = CoffeeStorage(filename='coffee.json')
-coffee_machine = CoffeeMachine(config)
 last_time_storage = Storage(filename='last_time.json')
-
+current_coffee = last_time_storage.get('last_brewed')
+current_coffee_data = coffee_storage.get_coffee(current_coffee)
+coffee_machine = CoffeeMachine(config, current_coffee, current_coffee_data)
 
 @app.route('/')
 async def index(request):
