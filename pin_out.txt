@@ -1,0 +1,16 @@
+
+
+
+
+EN      -                       D23 - servo, duty
+
+
+
+D27      -                       RX2(16) - display, RST
+D14      - display, CLK (sck)    D4      -
+D12      - display, BL           D2      - display, CE (cs)
+D13      - display, Din (MOSI)   D15     - display, DC
+GND      - servo                 GND     - display
+VIN (5v) - servo                 3v3     - display
+
+spi 2
