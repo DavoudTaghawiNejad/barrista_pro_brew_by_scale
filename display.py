@@ -5,8 +5,8 @@ import pcd8544
 class Display():
     def __init__(self, config):
         display = config.get('display')
-        spi = SPI(1)
-        spi.init(baudrate=2000000, polarity=0, phase=0, sck=Pin(14), mosi=Pin(13))
+        spi = SPI(display['spi'])
+        spi.init(baudrate=2000000, polarity=0, phase=0, sck=Pin(display['sck']), mosi=Pin(display['mosi']))
         self.bl = PWM(Pin(display['bl'], Pin.OUT, value=1), freq=5000)
         self.display = pcd8544.PCD8544_FRAMEBUF(spi=spi,
                                                 cs=Pin(display['cs']),
