@@ -3,14 +3,15 @@
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
     <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
-    <title>Barrista Uber - by Davoud Taghawi-Nejad</title>
+    <title>Barrista Ultra</title>
     <link href="https://unpkg.com/material-components-web@14.0.0/dist/material-components-web.min.css" rel="stylesheet">
     <script src="https://unpkg.com/material-components-web@14.0.0/dist/material-components-web.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         .container { max-width: 800px; margin: auto; padding: 20px; }
         .controls { margin: 20px 0; }
-        input { width: 100px; text-align: center; }
+        input { width: 60px; text-align: center !important; font-size: 18px; }
         canvas { max-width: 100%; }
         #chart-container {
             height: 600px;  /* Set to twice the assumed original height for better visibility */
@@ -25,9 +26,8 @@
         }
     #legend {
         font-size: 14px;
-        border-top: 1px solid #ccc;
-        padding-top: 10px;
-        margin-top: 10px;
+        padding-top: 0px;
+        margin-top: 0px;
     }
 
     :root {
@@ -91,7 +91,47 @@
         }
         .mdc-button, .mdc-text-field__input {
             height: 40px;  /* Standardize height */
+            font-size: 18px;
+            line-height: 40px;  /* Vertically center text */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+    @media (max-width: 768px) {
+        .container .mobile-container {
+            width: 100% ;
+            padding: 0 0px ;
+            box-sizing: border-box ;
+        }
+        .container .controls .mdc-button {
+            min-height: 34px ;
+            min-width: 34px ;
+            width: 100% ;
+            font-size: 18px;
+            height: auto ;
+        }
+        .container .controls .mdc-text-field .mdc-text-field__input {
+            min-height: 34px ;
+            min-width: 34px ;
+            width: 100% ;
+            font-size: 18px;
+            height: 34px ;  /* Match button height */
+            line-height: 34px;  /* Vertically center text */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container .controls .mdc-select .mdc-select__anchor {
+            min-height: 34px ;
+            width: 100% ;
+        }
+        .container .controls .mdc-select .mdc-select__selected-text {
+            font-size: 16px ;
+        }
+        .container h1, .container h3, .container label {
+            font-size: 18px ;
+        }
+    }
     </style>
 </head>
 <body>
@@ -108,27 +148,20 @@
     </div>
 
     <div class="container">
-        <h1>Barrista Uber - by Davoud Taghawi-Nejad</h1>
+        <h1>Barrista Ultra</h1>
         <div id="chart-container"></div>
 <div class="controls">
-    <div class="mobile-container">
-        <h3>Select or Create Coffee</h3>
-    </div>
     <div class="mobile-container" style="flex-wrap: wrap;">
-        <label for="coffeeSelect">Coffee Profile:</label>
-        <select id="coffeeSelect" class="mdc-select">
+        <select id="coffeeSelect" class="mdc-select" style="width: 100%; font-size: 18px;">
             <option value="">Select or Add Coffee</option>
         </select>
         <button class="mdc-button mdc-button--outlined" onclick="addNewCoffee()">Add New Coffee</button>
     </div>
     <div class="mobile-container">
-        <h3>Adjust Values</h3>
-    </div>
-    <div class="mobile-container">
-        <label>Dose (grams):</label>
+        <label>Dose (grams)</label>
         <button class="mdc-button mdc-button--raised" id="decreaseDose">-</button>
-        <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
-            <input type="number" id="dose" class="mdc-text-field__input" step="0.1" min="0" style="width: 100px;">
+        <label class="mdc-text-field mdc-text-field--outlined" style="width: 60px;">
+            <input type="number" id="dose" class="mdc-text-field__input" step="0.1" min="0" style="width: 60px;">
             <span class="mdc-notched-outline">
               <span class="mdc-notched-outline__leading"></span>
               <span class="mdc-notched-outline__notch">
@@ -140,10 +173,10 @@
         <button class="mdc-button mdc-button--raised" id="increaseDose">+</button>
     </div>
     <div class="mobile-container">
-        <label>Grind Size:</label>
+        <label>Grind&nbsp;size</label>
         <button class="mdc-button mdc-button--raised" id="decreaseGrind">-</button>
-        <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
-            <input type="number" id="grind_size" class="mdc-text-field__input" step="1" min="0" style="width: 100px;">
+        <label class="mdc-text-field mdc-text-field--outlined" style="width: 60px;">
+            <input type="number" id="grind_size" class="mdc-text-field__input" step="1" min="0" style="width: 60px;">
             <span class="mdc-notched-outline">
               <span class="mdc-notched-outline__leading"></span>
               <span class="mdc-notched-outline__notch">
@@ -155,10 +188,10 @@
         <button class="mdc-button mdc-button--raised" id="increaseGrind">+</button>
     </div>
     <div class="mobile-container">
-        <label>Extraction (grams):</label>
+        <label>Extraction (grams)</label>
         <button class="mdc-button mdc-button--raised" id="decrease">-</button>
-        <label class="mdc-text-field mdc-text-field--outlined" style="width: 100px;">
-            <input type="number" id="extraction" class="mdc-text-field__input" min="0" min="200" style="width: 100px;" step="1">
+        <label class="mdc-text-field mdc-text-field--outlined" style="width: 60px;">
+            <input type="number" id="extraction" class="mdc-text-field__input" min="0" min="200" style="width: 60px;" step="1">
             <span class="mdc-notched-outline">
               <span class="mdc-notched-outline__leading"></span>
               <span class="mdc-notched-outline__notch">
@@ -531,4 +564,12 @@ document.getElementById('coffeeSelect').addEventListener('change', async functio
                 });
             }
         }
+
+        function adjustGraphHeight() {
+            const chartContainer = document.getElementById('chart-container');
+            const containerWidth = chartContainer.offsetWidth;
+            chartContainer.style.height = Math.min(600, containerWidth * 0.8) + 'px';
+        }
+        window.addEventListener('load', adjustGraphHeight);
+        window.addEventListener('resize', adjustGraphHeight);
 </script>
