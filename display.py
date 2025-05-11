@@ -1,5 +1,5 @@
 import asyncio
-from machine import Pin, SPI, PWM
+from machine import Pin, SPI, PWM # type: ignore
 import pcd8544
 
 class Display():
