@@ -422,6 +422,7 @@ async function addNewCoffee() {
                         if (document.getElementById('coffeeSelect').options.length > 0) {
                         document.getElementById('coffeeSelect').value = name;  // Select by name
                         document.getElementById('coffeeSelect').dispatchEvent(new Event('change'));
+                        updateDisplay();  // Add this line
                     }
                 });
         } else {
@@ -462,6 +463,7 @@ document.getElementById('coffeeSelect').addEventListener('change', async functio
                 document.getElementById('dose').value = data.coffee.dose || '';
                 document.getElementById('grind_size').value = data.coffee.grind_size || '';
                 document.getElementById('extraction').value = data.coffee.extraction || '';
+                updateDisplay();  // Add this line
             } else {
                 snackbar.labelText = 'Coffee details not found.';
                 snackbar.open();
@@ -495,35 +497,66 @@ document.getElementById('coffeeSelect').addEventListener('change', async functio
             const input = document.getElementById('extraction');
             let value = parseInt(input.value) || 0;
             if (value > 0) input.value = value - 1;
+            updateDisplay();  // Add this line
         });
 
         document.getElementById('increase').addEventListener('click', function () {
             const input = document.getElementById('extraction');
             let value = parseInt(input.value) || 0;
             if (value < 100) input.value = value + 1;
+            updateDisplay();  // Add this line
         });
 
         document.getElementById('decreaseDose').addEventListener('click', function () {
             const input = document.getElementById('dose');
             let value = parseFloat(input.value) || 0.0;
             if (value > 0) input.value = (value - 0.1).toFixed(1);
+            updateDisplay();  // Add this line
         });
 
         document.getElementById('increaseDose').addEventListener('click', function () {
             const input = document.getElementById('dose');
             let value = parseFloat(input.value) || 0.0;
             input.value = (value + 0.1).toFixed(1);
+            updateDisplay();  // Add this line
         });
 
         document.getElementById('decreaseGrind').addEventListener('click', function () {
             const input = document.getElementById('grind_size');
             let value = parseInt(input.value) || 0;
             if (value > 0) input.value = value - 1;
+            updateDisplay();  // Add this line
         });
 
         document.getElementById('increaseGrind').addEventListener('click', function () {
             const input = document.getElementById('grind_size');
             let value = parseInt(input.value) || 0;
             input.value = value + 1;
+            updateDisplay();  // Add this line
         });
+
+        // Add input event listeners for direct edits
+        document.getElementById('dose').addEventListener('input', updateDisplay);
+        document.getElementById('grind_size').addEventListener('input', updateDisplay);
+        document.getElementById('extraction').addEventListener('input', updateDisplay);
+
+        async function updateDisplay() {
+            const selectedCoffee = document.getElementById('coffeeSelect').value;
+            const dose = document.getElementById('dose').value;
+            const grind_size = document.getElementById('grind_size').value;
+            const extraction = document.getElementById('extraction').value;
+
+            if (selectedCoffee) {
+                fetch('/update_display', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: selectedCoffee, dose: dose, grind_size: grind_size, extraction: extraction })
+                }).then(response => {
+                    if (!response.ok) {
+                        snackbar.labelText = 'Display update failed.';
+                        snackbar.open();
+                    }
+                });
+            }
+        }
 </script>

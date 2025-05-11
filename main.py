@@ -123,5 +123,22 @@ async def get_coffee(request):
     else:
         return {'status': 'error', 'message': 'Name parameter is required'}, 400
 
+
+@app.route('/update_display', methods=['POST'])
+async def update_display(request):
+    try:
+        data = request.json  # Assuming request.json is an async method or handle accordingly
+        coffee_name = data.get('name', 'Unknown')  # Default or get from data if available
+        dose = data.get('dose')
+        grind_size = data.get('grind_size')
+        extraction = data.get('extraction')
+
+        # Call the display update
+        coffee_machine.display.show_coffee(coffee_name, dose, grind_size, extraction)
+
+        return {'status': 'success'}, 200
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}, 400
+
 connect_wifi('ANDREIA-2G', '12341234')
 app.run(debug=True)

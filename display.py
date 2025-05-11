@@ -24,3 +24,13 @@ class Display():
             for brightness in range(900, step, -step):
                 self.bl.duty(brightness)
                 await asyncio.sleep(delay)
+
+    def show_coffee(self, coffee_name, dose, grind_size, extraction):
+        self.display.fill(0)
+        self.display.text(coffee_name.replace('The ', '').replace('the ', ''), 0, 0, 1)
+        self.display.hline(0, 10, 83)
+        self.display.text(f'Dose: {dose}', 0, 14, 1)
+        self.display.text(f'Grind: {grind_size}', 0, 26, 1)
+        self.display.text(f'Coffee: {extraction}', 0, 38, 1)
+
+        self.display.show()
