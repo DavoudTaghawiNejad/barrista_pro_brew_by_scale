@@ -1,33 +1,26 @@
 import asyncio
 import webrepl
+import json
 from microdot import Microdot, Response
 from network_tools import connect_wifi
 from fake_coffee_machine import CoffeeMachine
 from storage import Storage
 from coffee_storage import CoffeeStorage
-import json
+from tools import load_html_generatory
 
-
-def load_html_generatory():
-    with open('webpage.html') as f:
-        while True:
-            chunk = f.read(1024)
-            if not chunk:
-                break
-            yield chunk
 
 app = Microdot()
 
-config = Storage(filename='config.json')
+configuration = Storage(filename='config.json')
 coffee_storage = CoffeeStorage(filename='coffee.json')
 last_time_storage = Storage(filename='last_time.json')
 current_coffee = last_time_storage.get('last_brewed')
 current_coffee_data = coffee_storage.get_coffee(current_coffee)
-coffee_machine = CoffeeMachine(config, current_coffee, current_coffee_data)
+coffee_machine = CoffeeMachine(configuration, current_coffee, current_coffee_data)
 
 @app.route('/')
 async def index(request):
-    html = load_html_generatory()
+    html = load_html_generatory('webpage.html')
     return Response(html, headers={'Content-Type': 'text/html'})
 
 @app.route('/get_chart_data')
@@ -39,7 +32,7 @@ async def get_chart_data(request):
 async def update(request):
     try:
         data = request.json
-        config.set('extraction', round(float(data['extraction']), 1))
+        configuration.set('extraction', round(float(data['extraction']), 1))  # extraction, if button operated
         return {'status': 'success'}, 200
     except (KeyError, ValueError):
         return {'status': 'error', 'message': 'Invalid data'}, 400
@@ -146,6 +139,31 @@ async def update_display(request):
 async def start_webrepl(request):
     try:
         webrepl.start()
+        return {'status': 'success'}, 200
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}, 400
+
+@app.route('/config')
+async def config(request):
+    return Response(load_html_generatory('config.html'), headers={'Content-Type': 'text/html'})
+
+@app.route('/get_config')
+async def get_config(request):
+    config_data = configuration._storage
+    return config_data, 200, {'Content-Type': 'application/json'}
+
+@app.route('/save_config', methods=['POST'])
+async def save_config(request):
+    data = request.json
+    try:
+        # Validate JSON using json.loads
+        json.dumps(data)  # This will raise an error if data is not serializable to JSON
+    except Exception as e:
+        return {'status': 'error', 'message': 'JSON validation error'}, 400
+    try:
+        configuration._storage = data
+        with open(configuration.filename, 'w') as f:
+            json.dump(configuration._storage, f)
         return {'status': 'success'}, 200
     except Exception as e:
         return {'status': 'error', 'message': str(e)}, 400
