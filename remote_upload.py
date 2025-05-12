@@ -26,11 +26,10 @@ html_files = ['config.html', 'webpage.html']
 json_files = ['config.json']
 
 print(f"Uploading to {ESP32_IP}...")
-for suffix in ['py', 'html', 'json']:
-    for file_path in py_files + html_files + json_files:
-        print(f"Uploading {file_path}...")
-        subprocess.run([
-            "python", "webrepl_cli.py", "-p", PASSWORD,
-            file_path, f"{ESP32_IP}:/{os.path.basename(file_path)}"
-        ])
+for file_path in py_files + html_files + json_files:
+    print(f"Uploading {file_path}...")
+    subprocess.run([
+        "python", "webrepl_cli.py", "-p", PASSWORD,
+        file_path, f"{ESP32_IP}:/{os.path.basename(file_path)}"
+    ])
 print("Done.")
