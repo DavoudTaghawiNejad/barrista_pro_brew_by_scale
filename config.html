@@ -65,6 +65,7 @@
                 <button class="mdc-button mdc-button--outlined" onclick="revertConfig()">Revert</button>
                 <button class="mdc-button mdc-button--outlined" onclick="cancelEdit()">Cancel</button>
                 <button class="mdc-button mdc-button--raised" onclick="saveConfig()">Save</button>
+                <button class="mdc-button mdc-button--outlined" onclick="start_webrepl()">Webrepl</button>
             </div>
         </div>
     </div>
@@ -84,6 +85,28 @@
             // Load configuration from server
             await loadConfig();
         };
+
+        async function start_webrepl() {
+            try {
+                snackbar.labelText = 'Starting webrepl server...';
+                snackbar.open();
+                const response = await fetch('/start_webrepl', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                if (response.ok) {
+                    snackbar.labelText = 'webrepl server started successfully.';
+                    snackbar.open();
+                } else {
+                    snackbar.labelText = 'Failed to start webrepl server.';
+                    snackbar.open();
+                }
+            } catch (error) {
+                snackbar.labelText = 'Error starting webrepl server: ' + error.message;
+                snackbar.open();
+            }
+        }
 
         async function loadConfig() {
             try {

@@ -206,10 +206,9 @@
         <button class="mdc-button mdc-button--outlined" onclick="updateValues()">Remember Coffee</button>
         <button class="mdc-button mdc-button--raised" onclick="makeCoffee()">Make Coffee</button>
     </div>
-    <div class="mobile-container" style="flex-wrap: wrap;">
-        <button class="mdc-button mdc-button--outlined" onclick="openConfig()" style="width: 50%;">Config</button>
-        <button class="mdc-button mdc-button--outlined" onclick="start_webrepl()" style="width: 50%;">Webrepl</button>
-    </div>
+<div class="mobile-container" style="flex-wrap: wrap;">
+    <button class="mdc-button mdc-button--outlined" onclick="openConfig()" style="width: 100%;">Config</button>
+</div>
 </div>
     </div>
 
@@ -399,27 +398,6 @@ function openConfig() {
     window.location.href = '/config';
 }
 
-async function start_webrepl() {
-    try {
-        snackbar.labelText = 'Starting webrepl server...';
-        snackbar.open();
-        const response = await fetch('/start_webrepl', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({})
-        });
-        if (response.ok) {
-            snackbar.labelText = 'webrepl server started successfully.';
-            snackbar.open();
-        } else {
-            snackbar.labelText = 'Failed to start webrepl server.';
-            snackbar.open();
-        }
-    } catch (error) {
-        snackbar.labelText = 'Error starting webrepl server: ' + error.message;
-        snackbar.open();
-    }
-}
 
 async function loadCoffees() {
     const response = await fetch('/get_coffee_names');
