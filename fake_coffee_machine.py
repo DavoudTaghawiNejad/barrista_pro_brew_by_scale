@@ -52,7 +52,7 @@ class CoffeeMachine:
                 self.servo.click(self.servo.set_not_ready)
                 self.display_light.cancel()
                 break
-            await asyncio.sleep(10 / 1000)
+            await asyncio.sleep(50 / 1000)
             counter += 1
         self.is_makeing_coffee = False
         print('Coffee made')
