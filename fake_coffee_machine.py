@@ -29,7 +29,6 @@ class CoffeeMachine:
         self.is_makeing_coffee = True
 
     async def make_coffee(self, extraction):
-        # TODO if extraction is None, load last extraction
         assert self.is_makeing_coffee
         display_light = asyncio.create_task(self.display.backlight.pulse())
         await self.servo.click(self.servo.set_ready)

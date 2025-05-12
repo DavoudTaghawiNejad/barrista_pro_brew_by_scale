@@ -35,7 +35,7 @@ async def get_chart_data(request):
 async def update(request):
     try:
         data = request.json
-        configuration.set('extraction', round(float(data['extraction']), 1))  # extraction, if button operated
+        last_time_storage.set('extraction', round(float(data['extraction']), 1))  # remember extraction for button operation
         return {'status': 'success'}, 200
     except (KeyError, ValueError):
         return {'status': 'error', 'message': 'Invalid data'}, 400
@@ -50,7 +50,7 @@ async def make_coffee(request):
         try:
             extraction = round(float(data['extraction']), 1)
         except ValueError:
-            extraction = None
+            extraction = last_time_storage.get('extraction')
         coffee_machine.switch_on()
         asyncio.create_task(coffee_machine.make_coffee(extraction))
 
