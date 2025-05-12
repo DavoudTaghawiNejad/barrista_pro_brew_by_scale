@@ -8,6 +8,7 @@ from fake_coffee_machine import CoffeeMachine
 from storage import Storage
 from coffee_storage import CoffeeStorage
 from tools import load_html_generatory
+from reset_cause import substitute_coffee_name_with_reset_cause
 
 
 app = Microdot()
@@ -17,6 +18,7 @@ coffee_storage = CoffeeStorage(filename='coffee.json')
 last_time_storage = Storage(filename='last_time.json')
 current_coffee = last_time_storage.get('last_brewed')
 current_coffee_data = coffee_storage.get_coffee(current_coffee)
+current_coffee = substitute_coffee_name_with_reset_cause(current_coffee)
 coffee_machine = CoffeeMachine(configuration, current_coffee, current_coffee_data)
 
 @app.route('/')

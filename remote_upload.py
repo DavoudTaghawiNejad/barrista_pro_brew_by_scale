@@ -53,6 +53,7 @@ py_files = [
 'microdot.py',
 'network_tools.py',
 'pcd8544.py',
+'reset_cause.py',
 'scale.py',
 'storage.py',
 'switch_servo.py',
