@@ -66,6 +66,7 @@
                 <button class="mdc-button mdc-button--outlined" onclick="cancelEdit()">Cancel</button>
                 <button class="mdc-button mdc-button--raised" onclick="saveConfig()">Save</button>
                 <button class="mdc-button mdc-button--outlined" onclick="start_webrepl()">Webrepl</button>
+                <button class="mdc-button mdc-button--outlined" onclick="reset_esp32()">Reset</button>
             </div>
         </div>
     </div>
@@ -106,6 +107,29 @@
                 snackbar.labelText = 'Error starting webrepl server: ' + error.message;
                 snackbar.open();
             }
+        }
+
+        async function reset_esp32() {
+            try {
+                snackbar.labelText = 'Reset...';
+                snackbar.open();
+                const response = await fetch('/reset_esp32', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                if (response.ok) {
+                    snackbar.labelText = 'Reset strangely reported success.';
+                    snackbar.open();
+                } else {
+                    snackbar.labelText = 'Failed to reset esp23.';
+                    snackbar.open();
+                }
+            } catch (error) {
+                snackbar.labelText = 'Failed to reset esp23.' + error.message;
+                snackbar.open();
+            }
+
         }
 
         async function loadConfig() {

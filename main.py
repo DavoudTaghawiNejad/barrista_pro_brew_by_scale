@@ -1,6 +1,7 @@
 import asyncio
 import webrepl
 import json
+import machine
 from microdot import Microdot, Response
 from network_tools import connect_wifi
 from fake_coffee_machine import CoffeeMachine
@@ -151,6 +152,17 @@ async def config(request):
 async def get_config(request):
     config_data = configuration._storage
     return config_data, 200, {'Content-Type': 'application/json'}
+
+@app.route('/reset_esp32', methods=['POST'])
+async def reset_esp32(request):
+    try:
+        print('start reset...')
+        machine.reset()
+        print('... failed to reset')
+        return {'status': 'error', 'message': 'Failed to reset'}, 500
+
+    except Exception as e:
+        return {'status': 'error', 'message': f'Did not reset: {e}'}, 400
 
 @app.route('/save_config', methods=['POST'])
 async def save_config(request):
