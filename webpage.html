@@ -206,6 +206,10 @@
         <button class="mdc-button mdc-button--outlined" onclick="updateValues()">Remember Coffee</button>
         <button class="mdc-button mdc-button--raised" onclick="makeCoffee()">Make Coffee</button>
     </div>
+    <div class="mobile-container" style="flex-wrap: wrap;">
+        <button class="mdc-button mdc-button--outlined" onclick="openConfig()" style="width: 50%;">Config</button>
+        <button class="mdc-button mdc-button--outlined" onclick="start_webrepl()" style="width: 50%;">Webrepl</button>
+    </div>
 </div>
     </div>
 
@@ -387,6 +391,32 @@ async function updateValues() {
         }
     } else {
         snackbar.labelText = 'Please select a coffee first.';
+        snackbar.open();
+    }
+}
+
+function openConfig() {
+    window.location.href = 'config.html';
+}
+
+async function start_webrepl() {
+    try {
+        snackbar.labelText = 'Starting webrepl server...';
+        snackbar.open();
+        const response = await fetch('/start_webrepl', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+        if (response.ok) {
+            snackbar.labelText = 'webrepl server started successfully.';
+            snackbar.open();
+        } else {
+            snackbar.labelText = 'Failed to start webrepl server.';
+            snackbar.open();
+        }
+    } catch (error) {
+        snackbar.labelText = 'Error starting webrepl server: ' + error.message;
         snackbar.open();
     }
 }

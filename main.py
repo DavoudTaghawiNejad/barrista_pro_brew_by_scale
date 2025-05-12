@@ -1,4 +1,5 @@
 import asyncio
+import webrepl
 from microdot import Microdot, Response
 from network_tools import connect_wifi
 from fake_coffee_machine import CoffeeMachine
@@ -137,6 +138,14 @@ async def update_display(request):
         # Call the display update
         coffee_machine.display.show_coffee(coffee_name, dose, grind_size, extraction)
 
+        return {'status': 'success'}, 200
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}, 400
+
+@app.route('/start_webrepl', methods=['POST'])
+async def start_webrepl(request):
+    try:
+        webrepl.start()
         return {'status': 'success'}, 200
     except Exception as e:
         return {'status': 'error', 'message': str(e)}, 400
