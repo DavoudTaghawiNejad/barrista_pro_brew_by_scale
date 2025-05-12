@@ -321,14 +321,6 @@ async function makeCoffee() {
             const chartDataResponse = await fetch('/get_chart_data');
             if (chartDataResponse.ok) {
                 const responseData = await chartDataResponse.json();
-
-                if (responseData.is_makeing_coffee === false) {
-                    clearInterval(pollInterval);
-                    isMakingCoffee = false;
-                    snackbar.labelText = 'Coffee made successfully.';
-                    snackbar.open();
-                }
-
                 if (responseData.data && responseData.data.length > 0) {
                     if (chart.data.series[coffee_number - 1] && !chart.data.series[coffee_number - 1].value) {
                         chart.data.series[coffee_number - 1].value = [];
@@ -350,6 +342,12 @@ async function makeCoffee() {
                     chart.update();
                     updateLegend();  // Call again if chart options change
                 }
+                }
+                if (responseData.is_makeing_coffee === false) {
+                    clearInterval(pollInterval);
+                    isMakingCoffee = false;
+                    snackbar.labelText = 'Coffee made successfully.';
+                    snackbar.open();
                 }
             }
         } catch (error) {

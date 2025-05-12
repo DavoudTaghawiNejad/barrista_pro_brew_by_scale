@@ -44,18 +44,16 @@ class CoffeeMachine:
         while True:
             if timer() > 1:
                 extraction_weight += (0.7 * random() + 0.3 * extraction_weight) / 60 * 5
-
             if counter % 5 == 0:
                 self.weight_graph.append({'x': timer(), 'y': extraction_weight})
                 print(timer(), extraction_weight)
-
             if extraction_weight >= extraction:
+                self.weight_graph.append({'x': timer(), 'y': extraction_weight})
                 self.servo.click(self.servo.set_not_ready)
                 self.display_light.cancel()
                 break
             await asyncio.sleep(10 / 1000)
             counter += 1
-        self.weight_graph = []
         self.is_makeing_coffee = False
         print('Coffee made')
 
