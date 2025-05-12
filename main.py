@@ -44,7 +44,11 @@ async def make_coffee(request):
         return {'status': 'error', 'message': 'Coffee is already being made'}, 400
     try:
         data = request.json
-        extraction = round(float(data['extraction']), 1)
+        print(data['extraction'])
+        try:
+            extraction = round(float(data['extraction']), 1)
+        except ValueError:
+            extraction = None
         coffee_machine.switch_on()
         asyncio.create_task(coffee_machine.make_coffee(extraction))
 
@@ -52,11 +56,9 @@ async def make_coffee(request):
         coffee_name = data.get('name')  # Assuming the name is sent in the request
         if coffee_name:
             last_time_storage.set('last_brewed', coffee_name)
-
         return {'status': 'success'}, 200
     except (KeyError, ValueError) as e:
-        print(e)
-        return {'status': 'error', 'message': 'Invalid data'}, 400
+        return {'status': 'error', 'message': f'{str(e)}'}, 400
 
 # Update routes to use coffee_storage
 
