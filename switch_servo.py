@@ -1,4 +1,4 @@
-import time
+import asyncio
 import machine
 
 
@@ -12,30 +12,31 @@ class SwitchServo:
         self.current_angle = self.not_ready
         self.set_not_ready()
 
-    def _move_to_angle(self, angle, safety=True):
+    async def _move_to_angle(self, angle, safety=True):
         old_angle = self.current_angle
         angle = max(0, min(180, angle))
         if safety:
-            angle = max(angle, self.pressed)  # safety, never  press to hard
+            angle = max(angle, self.pressed)  # safety, never press too hard
         duty = int(26 + (angle / 180) * (128 - 26))
         self.servo.duty(duty)
-        time.sleep(0.5 * abs(old_angle - angle) / 180)
+        await asyncio.sleep(0.5 * abs(old_angle - angle) / 180)
         self.current_angle = angle
+        self.servo.duty(0)
 
-    def click(self, return_movement=None):
+    async def click(self, return_movement=None):
         old_angle = self.current_angle
-        self._move_to_angle(self.pressed)
-        time.sleep_ms(self.config.get('click_length'))
+        await self._move_to_angle(self.pressed)
+        await asyncio.sleep(self.config.get('click_length') / 1000.0)  # Convert ms to seconds
         if return_movement is None:
-            self._move_to_angle(old_angle)
+            await self._move_to_angle(old_angle)
         else:
-            return_movement()
+            await return_movement()
 
-    def press(self):
-        self._move_to_angle(self.pressed)
+    async def press(self):
+        await self._move_to_angle(self.pressed)
 
-    def set_ready(self):
-        self._move_to_angle(self.ready)
+    async def set_ready(self):
+        await self._move_to_angle(self.ready)
 
-    def set_not_ready(self):
-        self._move_to_angle(self.not_ready)
+    async def set_not_ready(self):
+        await self._move_to_angle(self.not_ready)
