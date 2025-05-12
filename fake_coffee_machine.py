@@ -29,7 +29,9 @@ class CoffeeMachine:
         self.is_makeing_coffee = True
 
     async def make_coffee(self, extraction):
+        # TODO if extraction is None, load last extraction
         assert self.is_makeing_coffee
+        display_light = asyncio.create_task(self.display.backlight.pulse())
         await self.servo.click(self.servo.set_ready)
         extraction_weight = 0
         self.weight_graph = []
@@ -42,11 +44,12 @@ class CoffeeMachine:
         timer = Timer()
         while True:
             if timer() > 1:
-                extraction_weight += (0.7 * random() + 0.3 * extraction_weight)
+                extraction_weight += (0.7 * random() + 0.3 * extraction_weight) / 5
             self.weight_graph.append({'x': timer(), 'y': extraction_weight})
             if extraction_weight >= extraction:
                 self.weight_graph.append({'x': timer(), 'y': extraction_weight})
                 await self.servo.click(self.servo.set_not_ready)
+                display_light.cancel()
                 break
             await asyncio.sleep(50 / 1000)
             counter += 1

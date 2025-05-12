@@ -44,6 +44,7 @@ def post_request_esp32(endpoint):
 
 py_files = [
 'boot.py',
+'backlight.py',
 'coffee_machine.py',
 'coffee_storage.py',
 'display.py',
