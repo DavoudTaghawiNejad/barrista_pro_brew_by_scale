@@ -7,6 +7,8 @@
  "scale_factor": 1,
  "click_length": 350,
  "make_coffee_button": 22,
+ "wifi_name": "ANDREIA-2G",
+ "wifi_password": "12341234",
  "display":{
     "spi": 1,
     "sck": 14,

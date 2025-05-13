@@ -1,21 +1,17 @@
+import gc
 import asyncio
 import webrepl
 import json
 import machine
 from microdot import Microdot, Response
+from storage import Storage
 from network_tools import connect_wifi
 from coffee_machine import CoffeeMachine
-from storage import Storage
 from coffee_storage import CoffeeStorage
 from tools import load_html_generatory
 from reset_cause import substitute_coffee_name_with_reset_cause
 from button import monitor_button
 
-
-connect_wifi('ANDREIA-2G', '12341234')
-
-
-app = Microdot()
 
 configuration = Storage(filename='config.json')
 coffee_storage = CoffeeStorage(filename='coffee.json')
@@ -23,7 +19,17 @@ last_time_storage = Storage(filename='last_time.json')
 current_coffee = last_time_storage.get('last_brewed')
 current_coffee_data = coffee_storage.get_coffee(current_coffee)
 current_coffee = substitute_coffee_name_with_reset_cause(current_coffee)
-coffee_machine = CoffeeMachine(configuration, current_coffee, current_coffee_data)
+coffee_machine = CoffeeMachine(configuration,
+                               current_coffee,
+                               current_coffee_data)
+gc.collect()
+
+wifi_connected = connect_wifi(configuration.get('wifi_name'),
+                              configuration.get('wifi_password'))
+gc.collect()
+
+app = Microdot()
+
 
 @app.route('/')
 async def index(request):
