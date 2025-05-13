@@ -41,7 +41,7 @@ def post_request_esp32(endpoint):
         print(f"Error executing {endpoint} on ESP32: {e}")
 
 py_files = [
-#'fake_scale.py',
+'fake_scale.py',
 'backlight.py',
 'button.py',
 'coffee_machine.py',
@@ -57,7 +57,8 @@ py_files = [
 'storage.py',
 'switch_servo.py',
 'tools.py',
-#'timer.py']
+'timer.py'
+]
 
 html_files = ['config.html', 'webpage.html']
 

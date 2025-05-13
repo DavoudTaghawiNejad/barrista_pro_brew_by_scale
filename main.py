@@ -4,12 +4,15 @@ import json
 import machine
 from microdot import Microdot, Response
 from network_tools import connect_wifi
-from fake_coffee_machine import CoffeeMachine
+from coffee_machine import CoffeeMachine
 from storage import Storage
 from coffee_storage import CoffeeStorage
 from tools import load_html_generatory
 from reset_cause import substitute_coffee_name_with_reset_cause
 from button import monitor_button
+
+
+connect_wifi('ANDREIA-2G', '12341234')
 
 
 app = Microdot()
@@ -184,8 +187,6 @@ async def save_config(request):
         return {'status': 'success'}, 200
     except Exception as e:
         return {'status': 'error', 'message': str(e)}, 400
-
-connect_wifi('ANDREIA-2G', '12341234')
 
 async def main():
     button = asyncio.create_task(monitor_button(configuration.get('make_coffee_button'),

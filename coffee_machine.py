@@ -1,36 +1,54 @@
-import json
 import asyncio
-import time
 from switch_servo import SwitchServo
-from scale import Scale
+from display import Display
+from timer import Timer
+from fake_scale import Scale
+
 
 class CoffeeMachine:
-    def __init__(self, config):
+    def __init__(self, config, coffee_name, coffee_data):
         self.config = config
         self.measurment_frequency = config.get('measurment_frequency')
+        self.weight_graph = []
+        self.display = Display(config)
+        self.scale = Scale(config)
         self.servo = SwitchServo(config)
         self.servo.set_not_ready()
-        self.scale = Scale(config)
-        self.is_brewing = False
+        self.display.show_coffee(coffee_name, **coffee_data)
+        self.is_makeing_coffee = False
 
-    async def make_coffee(self, extraction):
-        self.is_brewing = True
+
+    def switch_on(self):
+        self.is_makeing_coffee = True
+
+    async def make_coffee(self, extraction_target):
+        assert self.is_makeing_coffee
+        display_light = asyncio.create_task(self.display.backlight.pulse())
         self.scale.zero_and_start()
-        self.servo.click(self.servo.set_ready)
+        await self.servo.click(self.servo.set_ready)
         self.weight_graph = []
-        time = 0
+        timer = Timer()
         while True:
-            extraction_weight = self.scale.read_weight()
-
-            if time % 10 == 0:
-                self.weight_graph.append(extraction_weight)
-
-            if extraction_weight >= extraction:
-                self.servo.click(self.servo.set_not_ready)
+            extraction_weight = self.scale.read_weight(extraction_target)
+            self.weight_graph.append({'x': timer(), 'y': extraction_weight})
+            if extraction_weight >= extraction_target:
+                await self.servo.click(self.servo.set_ready)
                 break
-            await asyncio.sleep(10 / 1000)
-            time += 1
-        self.is_brewing = False
+            await asyncio.sleep(50 / 1000)
+
+        last_extraction_weight = extraction_weight
+        while True:
+            extraction_weight = self.scale.read_weight(extraction_target)
+            self.weight_graph.append({'x': timer(), 'y': extraction_weight})
+            if not extraction_weight > last_extraction_weight:
+                display_light.cancel()
+                break
+            await asyncio.sleep(.2)
+            last_extraction_weight = extraction_weight
+
+        self.servo.set_not_ready()
+        self.is_makeing_coffee = False
+        print('Coffee made')
 
     def programm_preinfusion(self, preinfusion_time=20):
         self.servo.press()
@@ -43,4 +61,4 @@ class CoffeeMachine:
     def get_chart_json(self):
         data = self.weight_graph.copy()
         self.weight_graph = []
-        return json.dumps(data)
+        return {'data': data, 'is_makeing_coffee': self.is_makeing_coffee}

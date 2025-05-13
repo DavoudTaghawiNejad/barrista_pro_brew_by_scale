@@ -1,16 +1,8 @@
 import asyncio
-from random import random
-import time
 from switch_servo import SwitchServo
 from display import Display
-
-
-class Timer:
-    def __init__(self):
-        self.start_time = time.ticks_ms()
-
-    def __call__(self):
-        return (time.ticks_ms() - self.start_time) / 1000
+from timer import Timer
+from fake_scale import Scale
 
 
 class CoffeeMachine:
@@ -18,40 +10,43 @@ class CoffeeMachine:
         self.config = config
         self.measurment_frequency = config.get('measurment_frequency')
         self.weight_graph = []
-        self.is_makeing_coffee = False
+        self.display = Display(config)
+        self.scale = Scale(config)
         self.servo = SwitchServo(config)
         self.servo.set_not_ready()
-        self.display = Display(config)
         self.display.show_coffee(coffee_name, **coffee_data)
+        self.is_makeing_coffee = False
 
 
     def switch_on(self):
         self.is_makeing_coffee = True
 
-    async def make_coffee(self, extraction):
+    async def make_coffee(self, extraction_target):
         assert self.is_makeing_coffee
         display_light = asyncio.create_task(self.display.backlight.pulse())
+        self.scale.zero_and_start()
         await self.servo.click(self.servo.set_ready)
-        extraction_weight = 0
         self.weight_graph = []
-        print('Start coffee making')
-        print('scale.zero_and_start')
-        print('servo.press')
-        print('servo.ready')
-        extraction_weight = 0
-        counter = 0
         timer = Timer()
         while True:
-            if timer() > 1:
-                extraction_weight += (0.7 * random() + 0.3 * extraction_weight) / 5
+            extraction_weight = self.scale.read_weight(extraction_target)
             self.weight_graph.append({'x': timer(), 'y': extraction_weight})
-            if extraction_weight >= extraction:
-                self.weight_graph.append({'x': timer(), 'y': extraction_weight})
-                await self.servo.click(self.servo.set_not_ready)
-                display_light.cancel()
+            if extraction_weight >= extraction_target:
+                await self.servo.click(self.servo.set_ready)
                 break
             await asyncio.sleep(50 / 1000)
-            counter += 1
+
+        last_extraction_weight = extraction_weight
+        while True:
+            extraction_weight = self.scale.read_weight(extraction_target)
+            self.weight_graph.append({'x': timer(), 'y': extraction_weight})
+            if not extraction_weight > last_extraction_weight:
+                display_light.cancel()
+                break
+            await asyncio.sleep(.2)
+            last_extraction_weight = extraction_weight
+
+        self.servo.set_not_ready()
         self.is_makeing_coffee = False
         print('Coffee made')
 
