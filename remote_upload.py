@@ -53,6 +53,7 @@ py_files = [
 'network_tools.py',
 'pcd8544.py',
 'reset_cause.py',
+'routs.py',
 'scale.py',
 'storage.py',
 'switch_servo.py',
