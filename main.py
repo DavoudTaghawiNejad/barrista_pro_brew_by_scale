@@ -9,6 +9,7 @@ from storage import Storage
 from coffee_storage import CoffeeStorage
 from tools import load_html_generatory
 from reset_cause import substitute_coffee_name_with_reset_cause
+from button import monitor_button
 
 
 app = Microdot()
@@ -185,4 +186,11 @@ async def save_config(request):
         return {'status': 'error', 'message': str(e)}, 400
 
 connect_wifi('ANDREIA-2G', '12341234')
-app.run(debug=True)
+
+async def main():
+    button = asyncio.create_task(monitor_button(configuration.get('make_coffee_button'),
+                                 coffee_machine, last_time_storage))
+    server = app.start_server(debug=True)
+    await asyncio.gather(server, button)
+
+asyncio.run(main())
