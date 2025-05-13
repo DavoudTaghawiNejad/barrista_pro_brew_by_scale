@@ -1,5 +1,4 @@
-import os
-import subprocess
+import sys
 import urllib.request as urllib_request
 import socket
 from webrepl_cli import *
@@ -9,7 +8,6 @@ REQUEST_PORT = "5000"
 WEBREPL_PORT = "8266"
 PASSWORD = "12341234"          # Your WebREPL password
 FILES_DIR = "."         # Directory with files
-
 
 
 def send_file(file_name):
@@ -43,12 +41,12 @@ def post_request_esp32(endpoint):
         print(f"Error executing {endpoint} on ESP32: {e}")
 
 py_files = [
-'boot.py',
+#'fake_scale.py',
 'backlight.py',
+'button.py',
 'coffee_machine.py',
 'coffee_storage.py',
 'display.py',
-'fake_coffee_machine.py',
 'hx711.py',
 'main.py',
 'microdot.py',
@@ -58,20 +56,25 @@ py_files = [
 'scale.py',
 'storage.py',
 'switch_servo.py',
-'tools.py']
+'tools.py',
+#'timer.py']
 
 html_files = ['config.html', 'webpage.html']
 
 json_files = ['config.json']
 
-post_request_esp32('start_webrepl')
-
-print(f"Uploading to {ESP32_IP}...")
-for file_name in py_files + html_files + json_files:
-    print(f"Uploading {file_name}...")
-    send_file(file_name)
-print("Upload done.")
-
-post_request_esp32('reset_esp32')
-
-print("ESP32 resetted\nThe end!")
+if __name__ == '__main__':
+    if len(sys.argv) == 1 or '-u' in sys.argv or '--upload' in sys.argv:
+        post_request_esp32('start_webrepl')
+        print(f"Uploading to {ESP32_IP}...")
+        for file_name in py_files + html_files + json_files:
+            print(f"Uploading {file_name}...")
+            send_file(file_name)
+        print("Upload done.")
+        post_request_esp32('reset_esp32')
+        print("ESP32 resetted\nThe end!")
+    else:
+        if '-w' in sys.argv or '--repl' in sys.argv or '--webrepl' in sys.argv:
+            post_request_esp32('start_webrepl')
+        if '-r' in sys.argv or '--reset' in sys.argv:
+            post_request_esp32('reset_esp32')
