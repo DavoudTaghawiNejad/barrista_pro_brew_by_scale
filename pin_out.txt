@@ -7,11 +7,28 @@ EN      -                       D23 - servo, duty
 
 
 
-D27      -                       RX2(16) - display, RST
-D14      - display, CLK (sck)    D4      -
+D27      - HX711, DT             RX2(16) - display, RST
+D14      - display, CLK (sck)    D4      - HX711, SCK
 D12      - display, BL           D2      - display, CE (cs)
 D13      - display, Din (MOSI)   D15     - display, DC
 GND      - servo                 GND     - display, button1
 VIN (5v) - servo                 3v3     - display
 
 spi 2
+
+
+Load cell extentions.
+E+, E-, A-, A+, /, /
+red, yellow, orange, green, /, /
+
+
+from scale import Scale
+s = Scale(configuration)
+s.set_zero()
+s.read_weight()
+
+
+
+other load cell soaldered, only for reference
+red, blue, yellow, orange, /, / - thick wire load cell
+red, yellow, orange, blue, /, / - thin wire load cell

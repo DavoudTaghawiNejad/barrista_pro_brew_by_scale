@@ -4,7 +4,7 @@
  "pressed_angle": 5,
  "not_ready_angle": 125,
  "servo_pin": 23,
- "scale_factor": 1,
+ "scale_factor": 1683.642,
  "click_length": 350,
  "make_coffee_button": 22,
  "wifi_name": "ANDREIA-2G",
@@ -16,4 +16,7 @@
     "cs": 2,
     "dc": 15,
     "rst":16,
-    "bl": 12}}
+    "bl": 12},
+ "scale": {
+   "dt": 27,
+   "sck": 4}}

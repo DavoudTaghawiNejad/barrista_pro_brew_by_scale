@@ -2,7 +2,7 @@ import asyncio
 from switch_servo import SwitchServo
 from display import Display
 from timer import Timer
-from fake_scale import Scale
+from scale import Scale
 
 
 class CoffeeMachine:
@@ -24,12 +24,13 @@ class CoffeeMachine:
     async def make_coffee(self, extraction_target):
         assert self.is_makeing_coffee
         display_light = asyncio.create_task(self.display.backlight.pulse())
-        self.scale.zero_and_start()
+        self.scale.set_zero()
         await self.servo.click(self.servo.set_ready)
         self.weight_graph = []
         timer = Timer()
         while True:
-            extraction_weight = self.scale.read_weight(extraction_target)
+            extraction_weight = self.scale.read_weight()
+            # memory allocation error, in next line:
             self.weight_graph.append({'x': timer(), 'y': extraction_weight})
             if extraction_weight >= extraction_target:
                 await self.servo.click(self.servo.set_ready)
@@ -38,7 +39,7 @@ class CoffeeMachine:
 
         last_extraction_weight = extraction_weight
         while True:
-            extraction_weight = self.scale.read_weight(extraction_target)
+            extraction_weight = self.scale.read_weight()
             self.weight_graph.append({'x': timer(), 'y': extraction_weight})
             if not extraction_weight > last_extraction_weight:
                 display_light.cancel()
