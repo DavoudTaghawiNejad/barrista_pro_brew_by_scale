@@ -2,17 +2,17 @@
 
 
 
-EN      -                       D23 - servo, duty
-                                D22 - button1
+EN      -                           D23 - servo, duty
+                                    D22 -
 
 
-
-D27      - HX711, DT             RX2(16) - display, RST
-D14      - display, CLK (sck)    D4      - HX711, SCK
-D12      - display, BL           D2      - display, CE (cs)
-D13      - display, Din (MOSI)   D15     - display, DC
-GND      - servo                 GND     - display, button1
-VIN (5v) - servo                 3v3     - display
+D26      - button1, coffee+sleep
+D27      - HX711, DT                RX2(16) - display, RST
+D14      - display, CLK (sck)       D4      - HX711, SCK
+D12      - display, BL              D2      - display, CE (cs)
+D13      - display, Din (MOSI)      D15     - display, DC
+GND      - servo                    GND     - display, button1
+VIN (5v) - servo                    3v3     - display
 
 https://i0.wp.com/circuits4you.com/wp-content/uploads/2018/12/ESP32-Pinout.jpg?w=758&ssl=1
 

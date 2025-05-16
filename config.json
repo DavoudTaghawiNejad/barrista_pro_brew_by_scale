@@ -6,7 +6,7 @@
  "servo_pin": 23,
  "scale_factor": 1683.642,
  "click_length": 350,
- "make_coffee_button": 22,
+ "make_coffee_button": 26,
  "wifi_name": "ANDREIA-2G",
  "wifi_password": "12341234",
  "display":{
