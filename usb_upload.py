@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
 import subprocess
-from remote_upload import py_files, html_files, json_files
-
-
+import sys
+from davouds_esp_tools import file_selector
 
 
 MPREMOTE = "./.venv/bin/mpremote"
@@ -13,7 +12,7 @@ BAUD_RATE = "115200"
 
 def upload_files():
     print("Uploading files to ESP32...")
-    for file in py_files + html_files + json_files:
+    for file in file_selector():
         print(f"Uploading {file}...")
         result = subprocess.run(
             [MPREMOTE, "connect", DEVICE, "fs", "cp", file, ":"],
@@ -44,14 +43,16 @@ def open_screen():
 
 def main():
     try:
+        quit_screen()
+        if len(sys.argv) == 1 or '-u' in sys.argv or '--upload' in sys.argv:
+            upload_files()
         print("Press ctrl+a, ctrl+d, y to exit screen session")
         while True:
-            if not upload_files():
-                quit_screen()
-                upload_files()
             open_screen()
+            quit_screen()
             print('ctrl-c for break, enter for upload')
             input()
+            upload_files()
     except Exception:
         quit_screen()
 

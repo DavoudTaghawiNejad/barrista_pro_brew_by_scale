@@ -2,8 +2,10 @@ import sys
 import urllib.request as urllib_request
 import socket
 from webrepl_cli import *
+from davouds_esp_tools import file_selector
 
-ESP32_IP = "192.168.0.13"  # Your ESP32 IP
+
+ESP32_IP = "192.168.0.12"  # Your ESP32 IP
 REQUEST_PORT = "5000"
 WEBREPL_PORT = "8266"
 PASSWORD = "12345678"          # Your WebREPL password
@@ -40,43 +42,19 @@ def post_request_esp32(endpoint):
     except Exception as e:
         print(f"Error executing {endpoint} on ESP32: {e}")
 
-py_files = [
-'backlight.py',
-'button.py',
-'coffee_machine.py',
-'coffee_storage.py',
-'display.py',
-'hx711.py',
-'main.py',
-'microdot.py',
-'network_tools.py',
-'pcd8544.py',
-'reset_cause.py',
-'routs.py',
-'scale.py',
-'storage.py',
-'switch_servo.py',
-'tools.py',
-'timer.py',
-'webrepl_cfg.py'
-]
-
-html_files = ['config.html', 'webpage.html']
-
-json_files = ['config.json']
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1 or '-u' in sys.argv or '--upload' in sys.argv:
+    if '-w' in sys.argv or '--repl' in sys.argv or '--webrepl' in sys.argv:
+        post_request_esp32('start_webrepl')
+    elif '-r' in sys.argv or '--reset' in sys.argv:
+        post_request_esp32('reset_esp32')
+    else:
+        files = file_selector()
         post_request_esp32('start_webrepl')
         print(f"Uploading to {ESP32_IP}...")
-        for file_name in py_files + html_files + json_files:
+        for file_name in files:
             print(f"Uploading {file_name}...")
             send_file(file_name)
         print("Upload done.")
         post_request_esp32('reset_esp32')
         print("ESP32 resetted\nThe end!")
-    else:
-        if '-w' in sys.argv or '--repl' in sys.argv or '--webrepl' in sys.argv:
-            post_request_esp32('start_webrepl')
-        if '-r' in sys.argv or '--reset' in sys.argv:
-            post_request_esp32('reset_esp32')
