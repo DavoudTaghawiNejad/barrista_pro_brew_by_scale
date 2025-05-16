@@ -39,3 +39,8 @@ class Display():
         await asyncio.sleep(sleep1)
         self.display.data(previous_on_screen)
         await asyncio.sleep(sleep2)
+
+
+    def power_off(self):
+        self.display.power_off()
+        self.backlight.off()

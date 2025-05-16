@@ -11,6 +11,7 @@ standard_files:
     - tools.py
     - timer.py
     - config.json
+    - deepsleep.py
 
 
 frontend:
@@ -36,5 +37,9 @@ sys:
     - reset_cause.py
 
 
-w:
+wip:
+    - main.py
     - deepsleep.py
+    - routs.py
+    - config.json
+    - display.py

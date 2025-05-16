@@ -9,7 +9,7 @@ def substitute_coffee_name_with_reset_cause(coffee_name):
         1: "HARD_RESET",
         2: "WDT_RESET",
         3: "BROWN_OUT_RESET",
-        4: "EXT_RESET",
+        4: "EXT_RESET/DEEPSLEEP_RESET",
         5: "PANIC_RESET",
         6: "SWDT_RESET"
     }
