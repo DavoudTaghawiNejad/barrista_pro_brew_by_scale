@@ -14,6 +14,8 @@ D13      - display, Din (MOSI)   D15     - display, DC
 GND      - servo                 GND     - display, button1
 VIN (5v) - servo                 3v3     - display
 
+https://i0.wp.com/circuits4you.com/wp-content/uploads/2018/12/ESP32-Pinout.jpg?w=758&ssl=1
+
 spi 2
 
 
