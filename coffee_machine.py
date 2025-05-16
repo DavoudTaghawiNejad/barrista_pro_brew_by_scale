@@ -28,10 +28,13 @@ class CoffeeMachine:
         await self.servo.click(self.servo.set_ready)
         self.weight_graph = []
         timer = Timer()
+        counter = 0
         while True:
             extraction_weight = self.scale.read_weight()
             # memory allocation error, in next line:
-            self.weight_graph.append({'x': timer(), 'y': extraction_weight})
+            if counter % 20 == 0 and len(self.weight_graph) < 20:
+                self.weight_graph.append({'x': timer(), 'y': extraction_weight})
+            counter += 1
             if extraction_weight >= extraction_target:
                 await self.servo.click(self.servo.set_ready)
                 break
@@ -40,7 +43,9 @@ class CoffeeMachine:
         last_extraction_weight = extraction_weight
         while True:
             extraction_weight = self.scale.read_weight()
-            self.weight_graph.append({'x': timer(), 'y': extraction_weight})
+            if counter % 20 == 0 and len(self.weight_graph) < 20:
+                self.weight_graph.append({'x': timer(), 'y': extraction_weight})
+            counter += 1
             if not extraction_weight > last_extraction_weight:
                 display_light.cancel()
                 break
