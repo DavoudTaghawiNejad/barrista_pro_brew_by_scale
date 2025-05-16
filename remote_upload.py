@@ -3,10 +3,10 @@ import urllib.request as urllib_request
 import socket
 from webrepl_cli import *
 
-ESP32_IP = "192.168.0.19"  # Your ESP32 IP
+ESP32_IP = "192.168.0.13"  # Your ESP32 IP
 REQUEST_PORT = "5000"
 WEBREPL_PORT = "8266"
-PASSWORD = "12341234"          # Your WebREPL password
+PASSWORD = "12345678"          # Your WebREPL password
 FILES_DIR = "."         # Directory with files
 
 
@@ -57,7 +57,8 @@ py_files = [
 'storage.py',
 'switch_servo.py',
 'tools.py',
-'timer.py'
+'timer.py',
+'webrepl_cfg.py'
 ]
 
 html_files = ['config.html', 'webpage.html']
