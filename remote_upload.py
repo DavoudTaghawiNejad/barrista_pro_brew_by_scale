@@ -41,7 +41,6 @@ def post_request_esp32(endpoint):
         print(f"Error executing {endpoint} on ESP32: {e}")
 
 py_files = [
-'fake_scale.py',
 'backlight.py',
 'button.py',
 'coffee_machine.py',
