@@ -10,7 +10,7 @@ async def monitor_button(gpio_pin_number, coffee_machine, last_time_storage, dee
         if state == 0 and last_state == 1 and not coffee_machine.is_makeing_coffee:
             extraction = last_time_storage.get('extraction')
             coffee_machine.switch_on()
-            deepsleeptimer.reset(at_least=180)
+            deepsleeptimer.reset(at_least_seconds=180)
             await asyncio.create_task(coffee_machine.make_coffee(extraction))
             deepsleeptimer.reset()
         await asyncio.sleep(90 / 1000)
