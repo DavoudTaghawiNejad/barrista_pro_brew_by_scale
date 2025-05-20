@@ -65,6 +65,7 @@
                 <button class="mdc-button mdc-button--outlined" onclick="revertConfig()">Revert</button>
                 <button class="mdc-button mdc-button--outlined" onclick="cancelEdit()">Cancel</button>
                 <button class="mdc-button mdc-button--raised" onclick="saveConfig()">Save</button>
+                <button class="mdc-button mdc-button--raised" onclick="openCalibration()">Calibration</button>
                 <button class="mdc-button mdc-button--outlined" onclick="start_webrepl()">Webrepl</button>
                 <button class="mdc-button mdc-button--outlined" onclick="reset_esp32()">Reset</button>
             </div>
@@ -157,6 +158,10 @@
 
         function cancelEdit() {
             window.location.href = '/';
+        }
+
+        function openCalibration() {
+            window.location.href = '/calibration';
         }
 
         async function saveConfig() {

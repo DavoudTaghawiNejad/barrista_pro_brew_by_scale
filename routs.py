@@ -181,3 +181,64 @@ async def save_config(request):
         return {'status': 'success'}, 200
     except Exception as e:
         return {'status': 'error', 'message': str(e)}, 400
+
+@app.route('/calibration')
+async def calibration(request):
+    return Response(load_html_generatory('calibration.html'), headers={'Content-Type': 'text/html'})
+
+@app.route('/calibration/tare', methods=['POST'])
+async def calibration_tare(request):
+    try:
+        # Set the zero point for the scale
+        coffee_machine.scale.set_zero()
+        return {'status': 'success'}, 200
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}, 400
+
+@app.route('/calibration/set_weight', methods=['POST'])
+async def calibration_set_weight(request):
+    try:
+        # Get the known weight from the request
+        weight = request.json.get('weight')
+        if not weight or weight <= 0:
+            return {'status': 'error', 'message': 'Invalid weight value'}, 400
+
+        coffee_machine.scale.set_scale(weight)
+        return {'status': 'success'}, 200
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}, 400
+
+@app.route('/calibration/verify', methods=['POST'])
+async def calibration_verify(request):
+    try:
+        # Read the current weight using the new calibration
+        current_weight = coffee_machine.scale.read_weight()
+
+        # For demonstration, we'll assume the weight from step 2 was around 50g
+        # In a real implementation, you would store this value during the set_weight step
+        weight_from_step2 = request.json.get('previous_weight', 50)
+        weight_change = current_weight - weight_from_step2
+
+        return {
+            'status': 'success',
+            'current_weight': current_weight,
+            'weight_change': weight_change
+        }, 200
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}, 400
+
+@app.route('/calibration/save', methods=['POST'])
+async def calibration_save(request):
+    try:
+        coffee_machine.scale.save_scale_factor()
+        return {'status': 'success'}, 200
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}, 400
+
+@app.route('/calibration/reset_scale_factor', methods=['POST'])
+async def calibration_save(request):
+    try:
+        coffee_machine.scale.reset_scale_factor()
+        return {'status': 'success'}, 200
+    except Exception as e:
+        return {'status': 'error', 'message': str(e)}, 400
