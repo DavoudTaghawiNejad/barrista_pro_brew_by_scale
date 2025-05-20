@@ -7,7 +7,7 @@ import asyncio
 class DeepSleepTimer:
     def __init__(self, config, coffee_machine):
         self.coffee_machine = coffee_machine
-        self.sleep_time_ms = config.get('deepsleep_after_seconds') * 1000
+        self.sleep_time_ms = max(config.get('deepsleep_after_seconds'), 35) * 1000
         self.next_sleep = time.ticks_ms() + self.sleep_time_ms
         self.reset()
         self.pins = config.get('wake_up_buttons')
