@@ -49,7 +49,7 @@ if __name__ == '__main__':
     elif '-r' in sys.argv or '--reset' in sys.argv:
         post_request_esp32('reset_esp32')
     else:
-        files = file_selector()
+        files = file_selector(sys.argv)
         post_request_esp32('start_webrepl')
         print(f"Uploading to {ESP32_IP}...")
         for file_name in files:

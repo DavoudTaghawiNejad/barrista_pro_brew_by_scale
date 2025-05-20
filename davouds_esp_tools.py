@@ -1,13 +1,20 @@
-import sys
 import yaml
 
 
-def file_selector():
-    files = read_files_to_upload()['standard_files']
-    if len(sys.argv) >= 1:
-        for arg in sys.argv[1:]:
+def file_selector(argv):
+    files_to_upload = read_files_to_upload()
+    if '-a' in argv or '--all' in argv:
+        print(files_to_upload)
+        files = []
+        for f in files_to_upload.values():
+            files += f
+    else:
+        files = files_to_upload['wip']
+
+    if len(argv) >= 1:
+        for arg in argv[1:]:
             if arg[0] != '-':
-                files += read_files_to_upload()[arg]
+                files += files_to_upload[arg]
     return set(files)
 
 def read_files_to_upload():

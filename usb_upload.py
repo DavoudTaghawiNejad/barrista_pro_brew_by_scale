@@ -12,7 +12,7 @@ BAUD_RATE = "115200"
 
 def upload_files():
     print("Uploading files to ESP32...")
-    for file in file_selector():
+    for file in file_selector(sys.argv):
         print(f"Uploading {file}...")
         result = subprocess.run(
             [MPREMOTE, "connect", DEVICE, "fs", "cp", file, ":"],
@@ -44,7 +44,7 @@ def open_screen():
 def main():
     try:
         quit_screen()
-        if len(sys.argv) == 1 or '-u' in sys.argv or '--upload' in sys.argv:
+        if not ('-s' in sys.argv or '--screen'in sys.argv):
             upload_files()
         print("Press ctrl+a, ctrl+d, y to exit screen session")
         while True:
@@ -54,6 +54,7 @@ def main():
             input()
             upload_files()
     except Exception:
+        raise
         quit_screen()
 
 
