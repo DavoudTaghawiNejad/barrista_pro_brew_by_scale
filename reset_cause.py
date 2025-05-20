@@ -16,6 +16,6 @@ def substitute_coffee_name_with_reset_cause(coffee_name, filter=[2, 3, 4, 5, 6])
     }
 
     if reset_cause in filter:
-        return coffee_name
-    else:
         return reset_cause_map.get(reset_cause, str(reset_cause))
+    else:
+        return coffee_name
