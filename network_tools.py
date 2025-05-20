@@ -15,7 +15,7 @@ class Wifi:
         time = 0
         while not self.wlan.isconnected():
             if time > 120:  # 120 -> 30 seconds
-                await display.show_text_timed(f'SSID:\n{self.ssid}\nPassword:\n{self.password}', inverted=True)
+                await display.show_text_timed(f'No connection:\nSSID:\n{self.ssid}\nPassword:\n{self.password}', inverted=True)
             time += 1
             await asyncio.sleep(0.25)
         print("Wi-Fi connected. IP:", self.wlan.ifconfig()[0])
