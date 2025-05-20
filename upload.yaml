@@ -38,6 +38,9 @@ sys:
     - network_tools.py
     - reset_cause.py
 
+reset_cause:
+    - reset_cause.py
+    - routs.py
 
 wip:
     - main.py

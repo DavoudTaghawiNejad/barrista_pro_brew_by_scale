@@ -15,7 +15,8 @@ coffee_storage = CoffeeStorage(filename='coffee.json')
 last_time_storage = Storage(filename='last_time.json')
 current_coffee = last_time_storage.get('last_brewed')
 current_coffee_data = coffee_storage.get_coffee(current_coffee)
-current_coffee = substitute_coffee_name_with_reset_cause(current_coffee)
+current_coffee = substitute_coffee_name_with_reset_cause(current_coffee,
+                                                         filter=[2, 3, 5, 6])
 coffee_machine = CoffeeMachine(configuration,
                                current_coffee,
                                current_coffee_data)
