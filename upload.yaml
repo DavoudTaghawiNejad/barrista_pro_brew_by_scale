@@ -13,6 +13,8 @@ standard_files:
     - config.json
     - deepsleep.py
 
+config:
+    - config.json
 
 frontend:
     - config.html
@@ -39,7 +41,4 @@ sys:
 
 wip:
     - main.py
-    - deepsleep.py
-    - routs.py
-    - config.json
-    - display.py
+    - network_tools.py
