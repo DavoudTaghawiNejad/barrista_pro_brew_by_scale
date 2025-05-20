@@ -5,6 +5,7 @@ from machine import Pin, PWM # type: ignore
 
 class Backlight():
     def __init__(self, backlight_pin):
+        self.pin_number = backlight_pin
         self.bl = PWM(Pin(backlight_pin, Pin.OUT, value=1), freq=5000)
         self.intensity = 1
         self.set_intensity(1)
@@ -29,6 +30,10 @@ class Backlight():
 
     def off(self):
         self.set_intensity(0)
+
+    def off_for_deepsleep(self):
+        Pin(self.pin_number, Pin.IN, Pin.PULL_DOWN)
+
 
     async def fade_in(self, delay=1 / 20, steps=20, max=1):
         min = int(self.intensity * 1000)

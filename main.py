@@ -25,13 +25,11 @@ app = Microdot()
 
 @app.before_request
 def before_request_reset_timer(request):
-    print('before reset')
     deepsleeptimer.reset()
 
 
 @app.after_request
 def after_request_reset_timer(request, response):
-    print('after reset')
     deepsleeptimer.reset()
 
 
