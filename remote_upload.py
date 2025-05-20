@@ -5,8 +5,8 @@ from webrepl_cli import *
 from davouds_esp_tools import file_selector
 
 
-ESP32_IP = "192.168.0.12"  # Your ESP32 IP
-REQUEST_PORT = "5000"
+ESP32_IP = "coffee.local"  # Your ESP32 IP
+REQUEST_PORT = "80"
 WEBREPL_PORT = "8266"
 PASSWORD = "12345678"          # Your WebREPL password
 FILES_DIR = "."         # Directory with files
