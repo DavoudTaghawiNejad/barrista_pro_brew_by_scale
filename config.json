@@ -9,6 +9,7 @@
  "make_coffee_button": 26,
  "wifi_name": "ANDREIA-2G",
  "wifi_password": "12341234",
+ "hostname": "coffee",
  "deepsleep_after_seconds": 300,
  "wake_up_buttons": [26],
  "display":{

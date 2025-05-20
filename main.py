@@ -13,8 +13,7 @@ configuration = Storage(filename='config.json')
 
 gc.collect()
 
-wifi = Wifi(configuration.get('wifi_name'),
-            configuration.get('wifi_password'))
+wifi = Wifi(configuration)
 gc.collect()
 
 deepsleeptimer = DeepSleepTimer(configuration,
