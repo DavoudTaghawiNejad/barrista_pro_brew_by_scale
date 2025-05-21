@@ -13,4 +13,4 @@ class Storage():
     def set(self, key, value):
         self._storage[key] = value
         with open(self.filename, 'w') as f:
-            json.dump(self._storage, f)  # Add indentation for pretty-printing
+            json.dump(self._storage, f)

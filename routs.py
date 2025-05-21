@@ -179,6 +179,9 @@ async def save_config(request):
         configuration._storage = data
         with open(configuration.filename, 'w') as f:
             json.dump(configuration._storage, f)
+
+        with open('webrepl_cfg.py', 'w') as f:
+            f.write(f"PASS = '{configuration.get('repl_password')}'")
         return {'status': 'success'}, 200
     except Exception as e:
         return {'status': 'error', 'message': str(e)}, 400
