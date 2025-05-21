@@ -55,4 +55,5 @@ except Exception as e:
     error_stream = io.StringIO()
     sys.print_exception(e, error_stream)
     LAST_ERROR = f"Type: {type(e).__name__}\nMessage: {str(e)}\nTraceback:\n{error_stream.getvalue()}"
+    last_time_storage.set('last_error', LAST_ERROR)
     raise
